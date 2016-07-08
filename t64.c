@@ -118,7 +118,7 @@ static bool t64_parse_header(t64_image_t *image)
             printf("t64fix: warning: fixing header magic bytes\n");
             image->fixes++;
         }
-        memcpy(image->magic, c64s_magic, T64_HDR_MAGIC_LEN);
+        strcpy((char *)(image->magic), magic_strings[result]);
     }
     /* get file record max and used counters */
     image->rec_max = get_uint16(image->data + T64_HDR_REC_MAX);
