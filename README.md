@@ -60,8 +60,3 @@ Another thing many images get wrong. File records are supposed to have a C1541
 file type byte, which normally should be between 0x80 and 0x84. In reality this
 is usually something like 0x01 or 0x44. This tool adjusts incorrect values to
 0x82 (PRG), since t64 files can really only store PRG files (and C64S' FRZ files)
-.
-
-
-
-

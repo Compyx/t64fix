@@ -107,15 +107,19 @@ static int t64_check_magic(const t64_image_t *image)
  *
  * @return  boolean
  */
-static bool t64_parse_header(t64_image_t *image)
+static bool t64_parse_header(t64_image_t *image, int quiet)
 {
     int result = t64_check_magic(image);
     if (result < 0) {
-        printf("t64fix: fatal: couldn't find header magic bytes, aborting\n");
+        if (!quiet) {
+            printf("t64fix: fatal: couldn't find magic bytes, aborting\n");
+        }
         return false;
     } else {
         if (result > 0) {
-            printf("t64fix: warning: fixing header magic bytes\n");
+            if (!quiet) {
+                printf("t64fix: warning: fixing header magic bytes\n");
+            }
             image->fixes++;
         }
         strcpy((char *)(image->magic), magic_strings[result]);
@@ -124,23 +128,29 @@ static bool t64_parse_header(t64_image_t *image)
     image->rec_max = get_uint16(image->data + T64_HDR_REC_MAX);
     image->rec_used = get_uint16(image->data + T64_HDR_REC_USED);
     if (image->rec_max == 0) {
-        printf("t64fix: warning: maximum records count reported as "
-               "0, adjusting to 1\n");
+        if (!quiet) {
+            printf("t64fix: warning: maximum records count reported as "
+                "0, adjusting to 1\n");
+        }
         image->rec_max = 1;
         image->fixes++;
     }
     if (image->rec_used == 0) {
-        printf("t64fix: warning: current records count reported as "
-               "0, adjusting to 1\n");
+        if (!quiet) {
+            printf("t64fix: warning: current records count reported as "
+                "0, adjusting to 1\n");
+        }
         /* this fix is required for the other fixes to work */
         image->rec_used = 1;
         image->fixes++;
     }
 
     if (image->rec_used > image->rec_max) {
-        printf("t64fix: warning: header reports more used records than "
-                "available records (%d > %d), fixing\n",
-                (int)(image->rec_used), (int)(image->rec_max));
+        if (!quiet) {
+            printf("t64fix: warning: header reports more used records than "
+                    "available records (%d > %d), fixing\n",
+                    (int)(image->rec_used), (int)(image->rec_max));
+        }
         image->rec_used = image->rec_max;
         image->fixes++;
     }
@@ -309,10 +319,11 @@ static t64_image_t *t64_new(void)
 /** @brief  Open t64 container
  *
  * @param   path    path to container
+ * @param   quiet   don't output anything on stdout/stderr
  *
  * @return  image or NULL on failure
  */
-t64_image_t *t64_open(const char *path)
+t64_image_t *t64_open(const char *path, int quiet)
 {
     t64_image_t *image;
     long size;
@@ -332,7 +343,7 @@ t64_image_t *t64_open(const char *path)
     /* store image size */
     image->size = (size_t)size;
     /* parse header for required information */
-    if (!t64_parse_header(image)) {
+    if (!t64_parse_header(image, quiet)) {
         /* header parsing failed, bail: */
         t64_free(image);
         return NULL;
@@ -374,30 +385,34 @@ void t64_free(t64_image_t *image)
 /** @brief  Verify data in \a image, optionally fixing it
  *
  * @param   image   t64 image
+ * @param   quiet   don't output anything on stdout/stderr
  *
  * @return  number of fixes, or -1 on error
  */
-int t64_verify(t64_image_t *image)
+int t64_verify(t64_image_t *image, int quiet)
 {
-    int fixes = 0;
     size_t rec_size;    /* file size according to record */
     size_t act_size;    /* actual file size */
     int i;
 
     /* check maximum record count */
     if (image->rec_max == 0) {
-        printf("t64fix: warning: maximum records count reported as "
+        if (!quiet) {
+            printf("t64fix: warning: maximum records count reported as "
                "0, adjusting to 1\n");
+        }
         image->rec_max = 1;
-        fixes++;
+        image->fixes++;
     }
     /* check number of used records */
     if (image->rec_used == 0) {
-        printf("t64fix: warning: used records count reported as 0, "
-                "adjusting to 1\n");
+        if (!quiet) {
+            printf("t64fix: warning: used records count reported as 0, "
+                    "adjusting to 1\n");
+        }
         /* this fix is required for the other fixes to work */
         image->rec_used = 1;
-        fixes++;
+        image->fixes++;
     }
 
     /* Fix end addresses by sorting file records on data offset and then using
@@ -419,8 +434,10 @@ int t64_verify(t64_image_t *image)
             record->status = T64_REC_SKIPPED;
         } else {
             if (record->c1541_ftype < 0x80 || record->c1541_ftype >= 0x85) {
-                printf("t64fix: illegal value $%02x for C1541 file type, "
-                        "assuming $82 (prg)\n", record->c1541_ftype);
+                if (!quiet) {
+                    printf("t64fix: illegal value $%02x for C1541 file type, "
+                            "assuming $82 (prg)\n", record->c1541_ftype);
+                }
                 record->c1541_ftype = 0x82;
                 record->status = T64_REC_FIXED;
                 image->fixes++;
@@ -443,9 +460,11 @@ int t64_verify(t64_image_t *image)
                 act_size = (size_t)(image->size - record->offset);
             }
             if (rec_size != act_size) {
-                printf("t64fix: warning: reported size of $%04lx does not "
-                        "match actual size of $%04lx\n",
-                        (unsigned long)rec_size, (unsigned long)act_size);
+                if (!quiet) {
+                    printf("t64fix: warning: reported size of $%04lx does not "
+                            "match actual size of $%04lx\n",
+                            (unsigned long)rec_size, (unsigned long)act_size);
+                }
                 record->status = T64_REC_FIXED;
                 image->fixes++;
                 record->real_end_addr = (unsigned short)(record->start_addr +

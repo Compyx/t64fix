@@ -19,7 +19,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/** @file   d64.ch- d64 support
+/** @file   d64.c - d64 support
  *
  * @brief   Simple d64 write support to be able to convert t64 to d64
  *

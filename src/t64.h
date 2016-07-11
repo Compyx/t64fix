@@ -99,9 +99,9 @@ typedef struct t64_image_s {
 
 
 
-t64_image_t *   t64_open(const char *path);
+t64_image_t *   t64_open(const char *path, int quiet);
 void            t64_free(t64_image_t *image);
-int             t64_verify(t64_image_t *image);
+int             t64_verify(t64_image_t *image, int quiet);
 void            t64_dump(const t64_image_t *image);
 bool            t64_write(t64_image_t *image, const char *path);
 

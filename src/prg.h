@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 bool prg_extract(const t64_image_t *image, int index, int quiet);
+bool prg_extract_all(const t64_image_t *image, int quiet);
 
 #endif
 

@@ -26,18 +26,58 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 
+#include "optparse.h"
 #include "t64.h"
+#include "prg.h"
 
 
-/** @brief  Print usage message on stdout
+/** @brief  Quiet mode flag
+ *
+ * If set, no output is sent to stdout/stderr, but the tool returns either
+ * EXIT_SUCCESS or EXIT_FAILURE. Useful for scripts.
  */
-static void usage(void)
+static bool quiet = 0;
+
+
+/** @brief  Extract program file
+ *
+ * This variable is the index of the program file to extract
+ */
+static long extract = -1;
+
+
+/** @brief  Extract all files
+ */
+static bool extract_all = 0;
+
+
+/** @brief  Command line options
+ */
+option_decl_t options[] = {
+    { 'q', "quiet", &quiet, OPT_BOOL, "don't output to stdout/stderr" },
+    { 'e', "extract", &extract, OPT_INT, "extract program file" },
+    { 'x', "extract-all", &extract_all, OPT_BOOL,
+        "extract all program files" },
+    { 0, NULL, NULL, 0, NULL }
+};
+
+
+/** @brief  Print error message on stderr
+ *
+ * If an error of T64_ERR_IO occured, the C library's errno and strerror() is
+ * printed as well.
+ */
+static void print_error(void)
 {
-    printf("Usage: t64fix SOURCE [DESTINATION]\n\n");
-    printf("If only SOURCE is specified the image will be verified.\n");
-    printf("If both SOURCE and DESTINATION are specified, SOURCE will be"
-            " verified, fixed\nand written to DESTINATION.\n");
+    fprintf(stderr, "t64fix: error %d: %s", t64_errno, t64_strerror(t64_errno));
+    if (t64_errno == T64_ERR_IO) {
+        fprintf(stderr, " (%d: %s)\n", errno, strerror(errno));
+    } else {
+        putchar('\n');
+    }
 }
 
 
@@ -46,42 +86,97 @@ static void usage(void)
  * @param   argc    argument count
  * @param   argv    argument vector
  *
+ * @todo:   Probably split handling of various options/commands into subroutines
+ *
  * @return  EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        /* display help */
-        usage();
-    }
-    if (argc >= 2) {
-#if 0
-        printf("Reading '%s' .. ", argv[1]);
-        fflush(stdout);
-#endif
-        t64_image_t *image = t64_open(argv[1]);
-        if (image == NULL) {
-            printf("failed to load '%s'\n", argv[1]);
-            return EXIT_FAILURE;
-        }
-        /* verify image and display results */
-        t64_verify(image);
-        t64_dump(image);
+    t64_image_t *image;
+    int result;
+    const char **args;
+    const char *infile;
+    const char *outfile;
 
-        /* write corrected image if requested */
-        if (argc > 2) {
-            printf("Writing corrected image to '%s' .. ", argv[2]);
+    if (!optparse_init(options, "t64fix", "0.2")) {
+        return EXIT_FAILURE;
+    }
+
+    if (argc < 2) {
+        /* display help and exit */
+        optparse_help();
+        optparse_exit();
+        return EXIT_FAILURE;
+    }
+
+    /* parse command line options */
+    result = optparse_exec(argc, argv);
+    if (result == OPT_EXIT_ERROR) {
+        optparse_exit();
+        return EXIT_FAILURE;
+    } else if (result < 0) {
+        /* --help or --version */
+        optparse_exit();
+        return EXIT_SUCCESS;
+    } else if (result == 0) {
+        fprintf(stderr, "t64fix: no input of output file(s) given, aborting\n");
+        optparse_exit();
+        return EXIT_FAILURE;
+    }
+
+
+    args = optparse_args();
+    infile = args[0];
+    outfile = result > 1 ? args[1] : NULL;
+
+    image = t64_open(infile, quiet);
+    if (image == NULL) {
+        if (!quiet) {
+            print_error();
+        }
+        return EXIT_FAILURE;
+    }
+    /* verify image and display results */
+    result = t64_verify(image, quiet);
+    if (!quiet) {
+        t64_dump(image);
+    }
+
+    /* write corrected image if requested */
+    if (outfile != NULL) {
+        if (!quiet) {
+            printf("Writing corrected image to '%s' .. ", outfile);
             fflush(stdout);
-            if (t64_write(image, argv[2])) {
+        }
+        if (t64_write(image, outfile)) {
+            if (!quiet) {
                 printf("OK\n");
-            } else {
+            }
+        } else {
+            if (!quiet) {
                 printf("failed\n");
             }
         }
-        /* clean up */
-        t64_free(image);
     }
 
-    return EXIT_SUCCESS;
+
+    if (extract_all) {
+        if (!prg_extract_all(image, quiet)) {
+            print_error();
+        }
+    } else if (extract >= 0) {
+        if (!prg_extract(image, (int)extract, quiet)) {
+            print_error();
+        }
+    }
+
+    /* clean up */
+    t64_free(image);
+    optparse_exit();
+
+    return result == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+
+
 

@@ -13,7 +13,7 @@ CFLAGS=-Wall -Wextra -pedantic -std=c89 -Wshadow -Wpointer-arith \
 	-Wredundant-decls -Wnested-externs -Wunreachable-code \
 	-g -O3
 
-OBJS = main.o d64.o t64.o base.o optparse.o
+OBJS = main.o d64.o prg.o t64.o base.o optparse.o
 HEADERS = base.h d64.h t64.h optparse.h
 
 TARGET=t64fix

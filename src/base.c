@@ -60,7 +60,8 @@ static const char *t64_err_msgs[] = {
     "OK",
     "out of memory error",
     "I/O error",
-    "not a T64 image"
+    "not a T64 image",
+    "index error"
 };
 
 
@@ -288,12 +289,50 @@ bool fwrite_wrapper(const char *path, const unsigned char *data, size_t size)
         t64_errno = T64_ERR_IO;
         result = false;
     } else {
-        if ((fwrite(data, 1, size, fd) != size)) {
+        if (fwrite(data, 1, size, fd) != size) {
             result = false;
         }
         fclose(fd);
     }
     return result;
 }
+
+
+/** @brief  Write a prg file to the OS
+ *
+ * @param   path    path of file
+ * @param   data    program file data, excluding start address
+ * @param   size    size of program file data, excluding start address
+ * @param   start   start address to use for program file
+ *
+ * @return  bool
+ */
+bool fwrite_prg(const char *path, const unsigned char *data, size_t size,
+        int start)
+{
+    bool result = false;
+    FILE *fd = fopen(path, "wb");
+    if (fd == NULL) {
+        t64_errno = T64_ERR_IO;
+        return false;
+    } else {
+        /* write start address */
+        if (fputc((unsigned char)(start & 0xff), fd) == EOF) {
+            goto fwrite_prg_exit;
+        }
+        if (fputc((unsigned char)((start >> 8) & 0xff), fd) == EOF) {
+            goto fwrite_prg_exit;
+        }
+        if (fwrite(data, 1, size, fd) != size) {
+            goto fwrite_prg_exit;
+        } else {
+            result = true;
+        }
+    }
+fwrite_prg_exit:
+    fclose(fd);
+    return result;
+}
+
 
 

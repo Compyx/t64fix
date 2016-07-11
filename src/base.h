@@ -39,10 +39,11 @@ typedef enum { false, true } bool;
 /** @brief Error codes
  */
 typedef enum t64_error_code_t {
-    T64_ERR_NONE,   /**< no error */
-    T64_ERR_OOM,    /**< out-of-memory error */
-    T64_ERR_IO,     /**< I/O error, inspect `errno` for details */
-    T64_ERR_INVALID /**< not a T64 image */
+    T64_ERR_NONE,       /**< no error */
+    T64_ERR_OOM,        /**< out-of-memory error */
+    T64_ERR_IO,         /**< I/O error, inspect `errno` for details */
+    T64_ERR_INVALID,    /**< not a T64 image */
+    T64_ERR_INDEX       /**< invalid index */
 } T64ErrorCode;
 
 
@@ -70,7 +71,8 @@ long            fread_alloc(unsigned char **dest, const char *path);
 
 bool            fwrite_wrapper(const char *path, const unsigned char *data,
                                size_t size);
-
+bool            fwrite_prg(const char *path, const unsigned char *data,
+                           size_t size, int start);
 const char *    t64_strerror(int code);
 
 #endif
