@@ -1,6 +1,6 @@
 # t64fix
 
-Version 0.1
+Version 0.2
 
 ## Introduction
 
@@ -15,9 +15,32 @@ were written by people who didn't really understand the format.
 
 ## Usage
 
-Usage is quite simple at the moment: `t64fix SOURCE [DESTINATION]`
-If called with only SOURCE, the SOURCE is verified, if called with DESTINATION
-the SOURCE is verified, corrected and written to DESTINATION.
+Usage is relatively simple: `t64fix [options] <SOURCE> [<DESTINATION>]`
+
+When just checking if a t64 file is correct, just issue `t64fix <SOURCE>`. This
+will verify the image and show its contents and any warnings on stdout. To fix
+an image, issue `t64fix <SOURCE> <DESTINATION>`, this will verify and fix
+\<SOURCE\> and write it to \<DESTINATION\>. Using the same for SOURCE and
+DESTINATION is fine, SOURCE is read into memory and then closed, so using
+`t64fix foo.t64 foo.t64` will fix foo.t64 and write it back.
+
+
+More 'advanced' use is available through a few command line switches:
+
+| option                 | description                                         |
+| ---------------------- | ----------------------------------------------------|
+| -q/--quiet             | don't output anything to stdout, for use in scripts |
+| -e/--extract \<index\> | extract file \<index\> from image                   |
+| -x/--extract-all       | extract all files, except memory snapshots          |
+| --help                 | show help                                           |
+| --version              | show version info                                   |
+
+
+The `--quiet` option tells t64fix to not output any information on stdout, it
+just returns an exit code (`EXIT_SUCCESS` or `EXIT_FAILURE`). See the bash
+script `scripts/verify_multi.sh` for an example.
+
+
 
 ### Things that get verified and fixed
 
@@ -60,3 +83,14 @@ Another thing many images get wrong. File records are supposed to have a C1541
 file type byte, which normally should be between 0x80 and 0x84. In reality this
 is usually something like 0x01 or 0x44. This tool adjusts incorrect values to
 0x82 (PRG), since t64 files can really only store PRG files (and C64S' FRZ files)
+
+
+## Future
+
+I probably won't be adding any more features to this tool, unless specifically
+asked for them. Any bugs found I will fix, and of course accept patches for
+them.
+Adding support for exporting to d64 is something I thought about and have
+decided to leave that to a library I'm writing. Better to write it once properly
+than multiple times half-assed.
+

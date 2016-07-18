@@ -39,11 +39,11 @@ typedef enum { false, true } bool;
 /** @brief Error codes
  */
 typedef enum t64_error_code_t {
-    T64_ERR_NONE,       /**< no error */
-    T64_ERR_OOM,        /**< out-of-memory error */
-    T64_ERR_IO,         /**< I/O error, inspect `errno` for details */
-    T64_ERR_INVALID,    /**< not a T64 image */
-    T64_ERR_INDEX       /**< invalid index */
+    T64_ERR_NONE,           /**< no error */
+    T64_ERR_OOM,            /**< out-of-memory error */
+    T64_ERR_IO,             /**< I/O error, inspect `errno` for details */
+    T64_ERR_T64_INVALID,    /**< not a T64 image */
+    T64_ERR_INDEX           /**< invalid index */
 } T64ErrorCode;
 
 
@@ -54,7 +54,7 @@ typedef enum t64_error_code_t {
 
 /** @brief  Maximum valid error code
  */
-#define T64_ERRNO_MAX   T64_ERR_INVALID
+#define T64_ERRNO_MAX   T64_ERR_INDEX
 
 
 
