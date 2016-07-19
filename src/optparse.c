@@ -334,8 +334,10 @@ int optparse_exec(int argc, char *argv[])
                 opt = find_option(arg[1], NULL);
             }
             if (opt == NULL) {
-                fprintf(stderr, "%s: unknown option '%s'\n",
+                fprintf(stderr, "%s: unknown option '%s', continuing\n",
                         prg_name, arg);
+                /* don't just complain, do something (thanks iAN) */
+                return OPT_EXIT_ERROR;
             }
             delta = handle_option(opt, argv[i + 1]);
             if (delta < 0) {
