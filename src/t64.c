@@ -460,6 +460,11 @@ int t64_verify(t64_image_t *image, int quiet)
                 act_size = (size_t)(image->size - record->offset);
             }
             if (rec_size != act_size) {
+                if (i == image->rec_used -1 && rec_size < act_size) {
+                    /* don't fix last record when actual size is larger: some
+                     * T64's have padding for the last record */
+                    continue;
+                }
                 if (!quiet) {
                     printf("t64fix: warning: reported size of $%04lx does not "
                             "match actual size of $%04lx\n",
