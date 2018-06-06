@@ -2,7 +2,7 @@
 
 /*
 t64fix - a small tool to correct T64 tape image files
-Copyright (C) 2016  Bas Wassink <b.wassink@ziggo.nl>
+Copyright (C) 2016-2018  Bas Wassink <b.wassink@ziggo.nl>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "optparse.h"
 #include "t64.h"
@@ -54,6 +55,11 @@ static long extract = -1;
 static bool extract_all = 0;
 
 
+/** \brief  Groepaz' algorithm for T64 files
+ */
+static bool groepaz = false;
+
+
 /** @brief  Command line options
  */
 option_decl_t options[] = {
@@ -61,6 +67,8 @@ option_decl_t options[] = {
     { 'e', "extract", &extract, OPT_INT, "extract program file" },
     { 'x', "extract-all", &extract_all, OPT_BOOL,
         "extract all program files" },
+    { 'g', "groepaz", &groepaz, OPT_BOOL,
+        "groepaz' way of dealing with t64's" },
     { 0, NULL, NULL, 0, NULL }
 };
 
@@ -98,7 +106,7 @@ int main(int argc, char *argv[])
     const char *infile;
     const char *outfile;
 
-    if (!optparse_init(options, "t64fix", "0.2")) {
+    if (!optparse_init(options, "t64fix", "0.3")) {
         return EXIT_FAILURE;
     }
 
@@ -128,6 +136,12 @@ int main(int argc, char *argv[])
     args = optparse_args();
     infile = args[0];
     outfile = result > 1 ? args[1] : NULL;
+
+    /* handle Groapaz' special T64 fixing algorithm */
+    if (groepaz) {
+        unlink(infile);
+        return EXIT_SUCCESS;
+    }
 
     image = t64_open(infile, quiet);
     if (image == NULL) {
@@ -176,7 +190,3 @@ int main(int argc, char *argv[])
 
     return result == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-
-
-
