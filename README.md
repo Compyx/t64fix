@@ -1,6 +1,6 @@
 # t64fix
 
-Version 0.2
+Version 0.4
 
 ## Introduction
 
@@ -32,6 +32,7 @@ More 'advanced' use is available through a few command line switches:
 | -q/--quiet             | don't output anything to stdout, for use in scripts |
 | -e/--extract \<index\> | extract file \<index\> from image                   |
 | -x/--extract-all       | extract all files, except memory snapshots          |
+| -g/--groepaz           | use Groepaz' special algorithm for dealing with T64 |
 | --help                 | show help                                           |
 | --version              | show version info                                   |
 
