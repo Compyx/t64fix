@@ -2,10 +2,16 @@
 
 A list of changes applied to the codebase, started too late as usual ;)
 
+### 2018-06-06
+
+* Add the -g/--groepaz command line switch.
+
+
 ### 2016-07-18
 
 * Remove d64 support, too much work. Another project which does support d64
   and other formats will replace this project soon(ish)
+
 
 ### 2016-07-11
 
