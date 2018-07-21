@@ -217,7 +217,7 @@ static int handle_option(option_decl_t *option, const char *arg)
  */
 static int print_option(option_decl_t *option)
 {
-    return printf("  -%c, --%s\t%s\n", option->name_short, option->name_long,
+    return printf("  -%c, --%-20s%s\n", option->name_short, option->name_long,
                 option->desc);
 }
 
@@ -229,8 +229,8 @@ void optparse_help(void)
 
     printf("Usage: %s [options] [arguments]\n\n", prg_name);
     printf("Options:\n");
-    printf("  --help        display help\n");
-    printf("  --version     display version information\n");
+    printf("  --help                    display help\n");
+    printf("  --version                 display version information\n");
     for (opt = options; opt->name_short != 0 && opt->name_long != NULL; opt++) {
         print_option(opt);
     }

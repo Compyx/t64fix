@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     const char *infile;
     const char *outfile;
 
-    if (!optparse_init(options, "t64fix", "0.3")) {
+    if (!optparse_init(options, "t64fix", "0.3.1")) {
         return EXIT_FAILURE;
     }
 
