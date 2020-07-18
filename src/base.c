@@ -143,7 +143,7 @@ void set_uint32(unsigned char *p, unsigned long v)
 {
     set_uint16(p, v & 0xffff);
     p[2] = (v >> 16) & 0xff;
-    p[3] = (v >> 24) & 0xff;
+    p[3] = (unsigned char)((v >> 24) & 0xff);
 }
 
 
