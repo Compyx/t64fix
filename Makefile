@@ -28,7 +28,7 @@ doc:
 
 .PHONY: clean
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET)*
 	rm -rfd $(DOCS)/html/*
 	rm -f *.html
 

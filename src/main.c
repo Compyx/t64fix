@@ -2,7 +2,7 @@
 
 /*
 t64fix - a small tool to correct T64 tape image files
-Copyright (C) 2016-2018  Bas Wassink <b.wassink@ziggo.nl>
+Copyright (C) 2016-2020  Bas Wassink <b.wassink@ziggo.nl>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

@@ -2,6 +2,11 @@
 
 A list of changes applied to the codebase, started too late as usual ;)
 
+
+### 2020-07-18
+
+* Update copyright to 2020
+
 ### 2018-06-06
 
 * Add the -g/--groepaz command line switch.
