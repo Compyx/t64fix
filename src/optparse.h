@@ -44,6 +44,12 @@ typedef enum {
 } option_type_t;
 
 
+enum {
+    OPT_ERR_MISSING_ARG,
+    OPT_ERR_INVALID_ARG
+};
+
+
 
 /** @brief  Option declaration type
  */
@@ -64,5 +70,6 @@ void            optparse_exit(void);
 const char **   optparse_args(void);
 void            optparse_help(void);
 void            optparse_set_prologue(void (*func)(void));
+char *          optparse_strerror(int err);
 
 #endif

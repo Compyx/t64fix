@@ -45,7 +45,7 @@ static bool quiet = 0;
 
 /** \brief  Path to fixed file with =o
  */
-static char *outfile = NULL;
+static const char *outfile = NULL;
 
 /** @brief  Extract program file
  *
@@ -152,6 +152,10 @@ int main(int argc, char *argv[])
 
     args = optparse_args();
     infile = args[0];
+    if (outfile == NULL && result > 1) {
+        outfile = args[1];
+    }
+
 
     /* handle Groapaz' special T64 fixing algorithm */
     if (groepaz) {
@@ -206,3 +210,5 @@ int main(int argc, char *argv[])
 
     return result == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+
+

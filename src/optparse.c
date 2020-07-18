@@ -181,6 +181,15 @@ static int handle_option(option_decl_t *option, const char *arg)
             break;
         case OPT_INT:
             if (arg == NULL) {
+                if (option->name_short > 0) {
+                    fprintf(stderr,
+                            "%s: Error: option -%c' requires an integer argument\n",
+                            prg_name, option->name_short);
+                } else {
+                    fprintf(stderr,
+                            "%s: Error: option '--%s' requires an integer argument\n",
+                            prg_name, option->name_long);
+                }
                 return -1;
             }
             errno = 0;
@@ -188,7 +197,7 @@ static int handle_option(option_decl_t *option, const char *arg)
             /* check for invalid crap */
             if (endptr == arg || errno == ERANGE) {
                 fprintf(stderr,
-                        "%s: failed to convert option argument to int: '%s'\n",
+                        "%s: Error: failed to convert option argument to int: '%s'\n",
                         prg_name, arg);
                 return -1;
             }
@@ -389,5 +398,4 @@ void optparse_set_prologue(void (*func)(void))
 {
     prologue_cb = func;
 }
-
 
