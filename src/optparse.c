@@ -71,6 +71,10 @@ static const char *prg_name = NULL;
  */
 static const char *prg_version = NULL;
 
+/** @brief  Prologue function for --help
+ */
+static void (*prologue_cb)(void);
+
 
 /** @brief  List of available options
  */
@@ -229,6 +233,9 @@ void optparse_help(void)
     option_decl_t *opt = options;
 
     printf("Usage: %s [options] [arguments]\n\n", prg_name);
+    if (prologue_cb != NULL) {
+        prologue_cb();
+    }
     printf("Options:\n");
     printf("  --help                    display help\n");
     printf("  --version                 display version information\n");
@@ -376,4 +383,11 @@ const char **optparse_args(void)
 {
     return arglist;
 }
+
+
+void optparse_set_prologue(void (*func)(void))
+{
+    prologue_cb = func;
+}
+
 

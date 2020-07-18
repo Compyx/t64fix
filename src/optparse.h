@@ -63,5 +63,6 @@ int             optparse_exec(int argc, char *argv[]);
 void            optparse_exit(void);
 const char **   optparse_args(void);
 void            optparse_help(void);
+void            optparse_set_prologue(void (*func)(void));
 
 #endif

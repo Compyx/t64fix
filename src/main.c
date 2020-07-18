@@ -1,4 +1,4 @@
-/* vim: set et ts=4 sw=4 sts=4 fdm=marker syntax=c.doxygen : */
+/* vim: set et ts=4 sw=4 sts=4 fdm=marker syntax=c.doxygen: */
 
 /*
 t64fix - a small tool to correct T64 tape image files
@@ -43,6 +43,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 static bool quiet = 0;
 
 
+/** \brief  Path to fixed file with =o
+ */
+static char *outfile = NULL;
+
 /** @brief  Extract program file
  *
  * This variable is the index of the program file to extract
@@ -65,12 +69,25 @@ static bool groepaz = false;
 option_decl_t options[] = {
     { 'q', "quiet", &quiet, OPT_BOOL, "don't output to stdout/stderr" },
     { 'e', "extract", &extract, OPT_INT, "extract program file" },
+    { 'o', "output", &outfile, OPT_STR, "write fixed file to <outfile>" },
     { 'x', "extract-all", &extract_all, OPT_BOOL,
         "extract all program files" },
     { 'g', "groepaz", &groepaz, OPT_BOOL,
         "groepaz' way of dealing with t64's" },
     { 0, NULL, NULL, 0, NULL }
 };
+
+
+static void help_prologue(void)
+{
+    printf("Examples:\n\n");
+    printf("  Inspect T64 file for errors:\n");
+    printf("    t64fix <input>\n");
+    printf("  Fix t64 file and save as new file:\n");
+    printf("    t64fix <input> -o <output>\n");
+    printf("  Extract all files as .PRG files:\n");
+    printf("    t64fix -x <input>\n");
+}
 
 
 /** @brief  Print error message on stderr
@@ -104,11 +121,11 @@ int main(int argc, char *argv[])
     int result;
     const char **args;
     const char *infile;
-    const char *outfile;
 
-    if (!optparse_init(options, "t64fix", "0.3.1")) {
+    if (!optparse_init(options, "t64fix", "0.3.2")) {
         return EXIT_FAILURE;
     }
+    optparse_set_prologue(help_prologue);
 
     if (argc < 2) {
         /* display help and exit */
@@ -135,7 +152,6 @@ int main(int argc, char *argv[])
 
     args = optparse_args();
     infile = args[0];
-    outfile = result > 1 ? args[1] : NULL;
 
     /* handle Groapaz' special T64 fixing algorithm */
     if (groepaz) {
