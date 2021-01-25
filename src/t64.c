@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 
@@ -575,3 +576,28 @@ bool t64_write(t64_image_t *image, const char *path)
 }
 
 /* }}} */
+
+
+
+t64_image_t *t64_create(const char *path, const char **args, int nargs)
+{
+    t64_image_t *image;
+    int n;
+    size_t dir_size;
+
+    printf("Creating new t64 image '%s':\n", path);
+    image = t64_new();
+    if (image == NULL) {
+        return NULL;    /* error already reported */
+    }
+
+    /* calculate directory size */
+    dir_size = (unsigned int)nargs * T64_RECORD_SIZE;
+    printf(".. directory size = %zu\n", dir_size);
+
+    for (n = 0; n < nargs; n++) {
+        printf(".. adding '%s'\n", args[n]);
+    }
+
+    return image;
+}

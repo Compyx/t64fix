@@ -7,7 +7,7 @@ VPATH=src
 INSTALL_PREFIX=/usr/local
 
 # -Wformat-signedness not in GCC < 5.0??
-CFLAGS=-Wall -Wextra -pedantic -std=c89 -Wshadow -Wpointer-arith \
+CFLAGS=-Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
 	-Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes \
 	-Wswitch-default -Wswitch-enum -Wuninitialized -Wconversion \
 	-Wredundant-decls -Wnested-externs -Wunreachable-code \

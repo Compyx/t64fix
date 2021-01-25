@@ -105,6 +105,8 @@ int             t64_verify(t64_image_t *image, int quiet);
 void            t64_dump(const t64_image_t *image);
 bool            t64_write(t64_image_t *image, const char *path);
 
+t64_image_t *   t64_create(const char *path, const char **args, int nargs);
+
 #endif
 
 

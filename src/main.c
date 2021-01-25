@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 #include "optparse.h"
@@ -64,6 +65,11 @@ static bool extract_all = 0;
 static bool groepaz = false;
 
 
+/** \brief  T64 archive to create
+ */
+static const char *create_file = NULL;
+
+
 /** @brief  Command line options
  */
 option_decl_t options[] = {
@@ -74,6 +80,8 @@ option_decl_t options[] = {
         "extract all program files" },
     { 'g', "groepaz", &groepaz, OPT_BOOL,
         "groepaz' way of dealing with t64's" },
+    { 'c', "create", &create_file, OPT_STR, "create T64 image" },
+
     { 0, NULL, NULL, 0, NULL }
 };
 
@@ -87,6 +95,8 @@ static void help_prologue(void)
     printf("    t64fix <input> -o <output>\n");
     printf("  Extract all files as .PRG files:\n");
     printf("    t64fix -x <input>\n");
+    printf("  Create T64 archive:\n");
+    printf("    t64fix -c awesome.t64 rasterblast.prg freezer.prg\n");
 }
 
 
@@ -144,7 +154,7 @@ int main(int argc, char *argv[])
         optparse_exit();
         return EXIT_SUCCESS;
     } else if (result == 0) {
-        fprintf(stderr, "t64fix: no input of output file(s) given, aborting\n");
+        fprintf(stderr, "t64fix: no input or output file(s) given, aborting\n");
         optparse_exit();
         return EXIT_FAILURE;
     }
@@ -160,6 +170,22 @@ int main(int argc, char *argv[])
     /* handle Groapaz' special T64 fixing algorithm */
     if (groepaz) {
         unlink(infile);
+        return EXIT_SUCCESS;
+    }
+
+    /* handle --create */
+    if (create_file != NULL) {
+        printf("Kreator!\n");
+        if (result < 1) {
+            fprintf(stderr,
+                    "t64fix: error: --create requested but no input file(s) given.");
+            optparse_exit();
+            return EXIT_FAILURE;
+        }
+
+        image = t64_create(create_file, args, result);
+        t64_free(image);
+        optparse_exit();
         return EXIT_SUCCESS;
     }
 
