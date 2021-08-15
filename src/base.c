@@ -1,8 +1,6 @@
-/* vim: set et ts=4 sw=4 sts=4 fdm=marker syntax=c.doxygen : */
-
 /*
 t64fix - a small tool to correct T64 tape image files
-Copyright (C) 2016-2020  Bas Wassink <b.wassink@ziggo.nl>
+Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -27,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -93,8 +93,7 @@ const char *t64_strerror(int code)
 int base_err_alloc(size_t n)
 {
     t64_errno = T64_ERR_OOM;
-    return fprintf(stderr, "failed to allocate %lu bytes\n",
-            (unsigned long)n);
+    return fprintf(stderr, "failed to allocate %zu bytes\n", n);
 }
 
 
@@ -104,9 +103,9 @@ int base_err_alloc(size_t n)
  *
  * @return  unsigned 16-bit little endian value
  */
-unsigned short get_uint16(const unsigned char *p)
+uint16_t get_uint16(const uint8_t *p)
 {
-    return (unsigned short)(p[0] + (1<<8) * p[1]);
+    return (uint16_t)(p[0] + (1 <<8 ) * p[1]);
 }
 
 
@@ -115,10 +114,10 @@ unsigned short get_uint16(const unsigned char *p)
  * @param   p   destination of value
  * @param   v   unsigned 16-bit value
  */
-void set_uint16(unsigned char *p, unsigned short v)
+void set_uint16(uint8_t *p, uint16_t v)
 {
-    p[0] = (unsigned char)(v & 0xff);
-    p[1] = (unsigned char)((v >> 8) & 0xff);
+    p[0] = (uint8_t)(v & 0xff);
+    p[1] = (uint8_t)((v >> 8) & 0xff);
 }
 
 
@@ -129,9 +128,9 @@ void set_uint16(unsigned char *p, unsigned short v)
  *
  * @return  unsigned 32-bit little endian value
  */
-unsigned long get_uint32(const unsigned char *p)
+uint32_t get_uint32(const uint8_t *p)
 {
-    return (unsigned long)(get_uint16(p) + (1<<16) * p[2] + (1<<24) * p[3]);
+    return (uint32_t)(get_uint16(p) + (1<<16) * p[2] + (1<<24) * p[3]);
 }
 
 
@@ -140,11 +139,11 @@ unsigned long get_uint32(const unsigned char *p)
  * @param   p   destination of value
  * @param   v   unsigned 16-bit value
  */
-void set_uint32(unsigned char *p, unsigned long v)
+void set_uint32(uint8_t *p, uint32_t v)
 {
     set_uint16(p, v & 0xffff);
     p[2] = (v >> 16) & 0xff;
-    p[3] = (unsigned char)((v >> 24) & 0xff);
+    p[3] = (uint8_t)((v >> 24) & 0xff);
 }
 
 
@@ -163,7 +162,9 @@ unsigned int num_blocks(unsigned int n)
 /** @brief  Read file into memory
  *
  * This function reads data from file \a path into \a dest, allocating memory
- * while doing so. The value returned is the size of the memory allocated. If
+ * while doing so.
+ *
+ * The value returned is the size of the memory allocated. If
  * this function fails -1 is returned and \*dest is set to NULL. Should an
  * empty file be read, \*dest is also set to NULL and the buffer used is freed.
  *
@@ -186,10 +187,10 @@ unsigned int num_blocks(unsigned int n)
  *
  * @returns size of buffer allocated, or -1 on error
  */
-long fread_alloc(unsigned char **dest, const char *path)
+long fread_alloc(uint8_t **dest, const char *path)
 {
-    unsigned char *buffer;
-    unsigned char *tmp;
+    uint8_t *buffer;
+    uint8_t *tmp;
     size_t bufsize = FRA_BLOCK_SIZE;
     size_t bufread = 0;
     size_t result;
@@ -282,7 +283,7 @@ long fread_alloc(unsigned char **dest, const char *path)
  *
  * @return  bool
  */
-bool fwrite_wrapper(const char *path, const unsigned char *data, size_t size)
+bool fwrite_wrapper(const char *path, const uint8_t *data, size_t size)
 {
     bool result = true;
     FILE *fd = fopen(path, "wb");
@@ -308,7 +309,7 @@ bool fwrite_wrapper(const char *path, const unsigned char *data, size_t size)
  *
  * @return  bool
  */
-bool fwrite_prg(const char *path, const unsigned char *data, size_t size,
+bool fwrite_prg(const char *path, const uint8_t *data, size_t size,
         int start)
 {
     bool result = false;
@@ -334,3 +335,56 @@ fwrite_prg_exit:
     fclose(fd);
     return result;
 }
+
+
+
+/*
+ * Memory allocation functions, akin to xmalloc()
+ */
+
+
+/** \brief  Allocate \a n bytes on the heap
+ *
+ * \param[in]   n   number of bytes to allocate
+ *
+ * \return  pointer to allocated memory
+ */
+void *base_malloc(size_t n)
+{
+    void *p = malloc(n);
+    if (p == NULL) {
+        base_err_alloc(n);
+        exit(1);
+    }
+    return p;
+}
+
+
+/** \brief  Free memory at \a p
+ *
+ * \param[in]   p   memory to free
+ */
+void base_free(void *p)
+{
+    free(p);
+}
+
+
+/** \brief  Reallocate memory at \a p to \a n bytes
+ *
+ * \param[in]   p   memory to reallocate
+ * \param[in]   n   new size of \a p
+ *
+ * \return  pointer to reallocated memory
+ */
+void *base_realloc(void *p, size_t n)
+{
+    void *tmp = realloc(p, n);
+
+    if (tmp == NULL) {
+        base_err_alloc(n);
+        exit(1);
+    }
+    return tmp;
+}
+

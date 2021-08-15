@@ -1,5 +1,3 @@
-/* vim: set et ts=4 sw=4 sts=4 fdm=marker syntax=c.doxygen : */
-
 /*
 t64fix - a small tool to correct T64 tape image files
 Copyright (C) 2016-2020  Bas Wassink <b.wassink@ziggo.nl>
@@ -28,7 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define BASE_H_
 
 #include <stdlib.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 
 
 /** @brief Error codes
@@ -56,19 +55,25 @@ typedef enum t64_error_code_t {
 extern int t64_errno;
 
 int             base_err_alloc(size_t n);
-unsigned short  get_uint16(const unsigned char *p);
-void            set_uint16(unsigned char *p, unsigned short v);
-unsigned long   get_uint32(const unsigned char *p);
-void            set_uint32(unsigned char *p, unsigned long v);
+
+uint16_t        get_uint16(const uint8_t *p);
+void            set_uint16(uint8_t *p, uint16_t v);
+uint32_t        get_uint32(const uint8_t *p);
+void            set_uint32(uint8_t *p, uint32_t v);
 unsigned int    num_blocks(unsigned int n);
 
-long            fread_alloc(unsigned char **dest, const char *path);
+long            fread_alloc(uint8_t **dest, const char *path);
 
-bool            fwrite_wrapper(const char *path, const unsigned char *data,
+bool            fwrite_wrapper(const char *path, const uint8_t *data,
                                size_t size);
-bool            fwrite_prg(const char *path, const unsigned char *data,
+bool            fwrite_prg(const char *path, const uint8_t *data,
                            size_t size, int start);
 const char *    t64_strerror(int code);
+
+
+void *          base_malloc(size_t n);
+void            base_free(void *p);
+void *          base_realloc(void *p, size_t n);
 
 #endif
 

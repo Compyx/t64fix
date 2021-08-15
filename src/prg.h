@@ -1,5 +1,3 @@
-/* vim: set et ts=4 sw=4 sts=4 fdm=marker syntax=c.doxygen : */
-
 /*
 t64fix - a small tool to correct T64 tape image files
 Copyright (C) 2016-2020  Bas Wassink <b.wassink@ziggo.nl>

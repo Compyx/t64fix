@@ -1,8 +1,6 @@
-/* vim: set et ts=4 sw=4 sts=4 fdm=marker syntax=c.doxygen : */
-
 /*
 t64fix - a small tool to correct T64 tape image files
-Copyright (C) 2016-2020  Bas Wassink <b.wassink@ziggo.nl>
+Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -27,7 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef HAVE_T64_H
 #define HAVE_T64_H
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <inttypes.h>
+
 #include "base.h"
+
 
 #define T64_HDR_MAGIC       0x00    /**< magic 'C64*', unreliable */
 #define T64_HDR_MAGIC_LEN   0x20    /**< length of magic bytes */
@@ -69,13 +72,13 @@ typedef enum {
  * Contains information of a single file in the container
  */
 typedef struct t64_record_s {
-    unsigned char   filename[16];   /**< filename in PETSCII */
-    unsigned long   offset;         /**< offset in container of file data */
-    unsigned short  start_addr;     /**< start address on C64 */
-    unsigned short  end_addr;       /**< end address on C64 (exclusive) */
-    unsigned short  real_end_addr;  /**< real end address after fixing */
-    unsigned char   c64s_ftype;     /**< C64S file type */
-    unsigned char   c1541_ftype;    /**< C1541 file type */
+    uint8_t         filename[16];   /**< filename in PETSCII */
+    uint32_t        offset;         /**< offset in container of file data */
+    uint16_t        start_addr;     /**< start address on C64 */
+    uint16_t        end_addr;       /**< end address on C64 (exclusive) */
+    uint16_t        real_end_addr;  /**< real end address after fixing */
+    uint8_t         c64s_ftype;     /**< C64S file type */
+    uint8_t         c1541_ftype;    /**< C1541 file type */
     int             index;          /**< index in container records */
     t64_status_t    status;         /**< record status (OK, fixed, skipped) */
 } t64_record_t;
@@ -85,15 +88,15 @@ typedef struct t64_record_s {
 /** @brief  t64 container type
  */
 typedef struct t64_image_s {
-    unsigned char   magic[T64_HDR_MAGIC_LEN];   /**< tape magic in ASCII */
-    unsigned char   tapename[T64_HDR_NAME_LEN]; /**< name of tape in PESTCII */
+    uint8_t         magic[T64_HDR_MAGIC_LEN];   /**< tape magic in ASCII */
+    uint8_t         tapename[T64_HDR_NAME_LEN]; /**< name of tape in PESTCII */
     const char *    path;           /**< path to container file */
-    unsigned char * data;           /**< container file data */
+    uint8_t *       data;           /**< container file data */
     size_t          size;           /**< size of data */
     t64_record_t *  records;        /**< file records */
-    unsigned short  rec_max;        /**< maximum number of records */
-    unsigned short  rec_used;       /**< current number of records */
-    unsigned short  version;        /**< tape version */
+    uint16_t        rec_max;        /**< maximum number of records */
+    uint16_t        rec_used;       /**< current number of records */
+    uint16_t        version;        /**< tape version */
     int             fixes;          /**< number of fixes applied */
 } t64_image_t;
 

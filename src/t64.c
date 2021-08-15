@@ -1,8 +1,6 @@
-/* vim: set et ts=4 sw=4 sts=4 fdm=marker syntax=c.doxygen : */
-
 /*
 t64fix - a small tool to correct T64 tape image files
-Copyright (C) 2016  Bas Wassink <b.wassink@ziggo.nl>
+Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -281,8 +279,9 @@ static void t64_print_record(const t64_image_t *image, int index)
     memcpy(filename, record->filename, T64_REC_FILENAME_LEN);
     filename[T64_REC_FILENAME_LEN] = '\0';
 
-    printf("%5d  \"%s\" %s  $%04x-$%04x  $%04x-$%04x  %s\n",
-            num_blocks((unsigned int)size), filename,
+    printf("%5d  \"%-16s\" %s  $%04x-$%04x  $%04x-$%04x  %s\n",
+            num_blocks((unsigned int)size),
+            filename,
             c1541_types[record->c1541_ftype & 0x07],
             record->start_addr, record->end_addr,
             record->start_addr, record->real_end_addr,
@@ -301,11 +300,7 @@ static void t64_print_record(const t64_image_t *image, int index)
  */
 static t64_image_t *t64_new(void)
 {
-    t64_image_t *image = malloc(sizeof *image);
-    if (image == NULL) {
-        base_err_alloc(sizeof *image);
-        return NULL;
-    }
+    t64_image_t *image = base_malloc(sizeof *image);
     image->path = NULL;
     image->data = NULL;
     image->size = 0;
@@ -351,11 +346,7 @@ t64_image_t *t64_open(const char *path, int quiet)
     }
 
     /* allocate and read records */
-    image->records = malloc(sizeof *(image->records) * image->rec_used);
-    if (image->records == NULL) {
-        base_err_alloc(sizeof *(image->records) * image->rec_used);
-        return NULL;
-    }
+    image->records = base_malloc(sizeof *(image->records) * image->rec_used);
     for (i = 0; i < image->rec_used; i++) {
         t64_read_record(image->records + i,
                 image->data + T64_RECORDS_OFFSET + i * T64_RECORD_SIZE);
@@ -373,12 +364,12 @@ t64_image_t *t64_open(const char *path, int quiet)
 void t64_free(t64_image_t *image)
 {
     if (image->data != NULL) {
-        free(image->data);
+        base_free(image->data);
     }
     if (image->records != NULL) {
-        free(image->records);
+        base_free(image->records);
     }
-    free(image);
+    base_free(image);
 }
 
 
@@ -578,12 +569,13 @@ bool t64_write(t64_image_t *image, const char *path)
 /* }}} */
 
 
-
 t64_image_t *t64_create(const char *path, const char **args, int nargs)
 {
     t64_image_t *image;
     int n;
-    size_t dir_size;
+    uint32_t dir_size;
+    uint32_t data_offset;
+
 
     printf("Creating new t64 image '%s':\n", path);
     image = t64_new();
@@ -593,11 +585,72 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
 
     /* calculate directory size */
     dir_size = (unsigned int)nargs * T64_RECORD_SIZE;
-    printf(".. directory size = %zu\n", dir_size);
+    printf(".. directory size = $%04x\n", (unsigned int)dir_size);
+    /* calculate file data offset */
+    data_offset = T64_RECORDS_OFFSET + dir_size;
+    printf(".. data offset = $%04x\n", (unsigned int)data_offset);
 
+    /* allocate data for records */
+    image->records = base_malloc(sizeof *(image->records) * (size_t)nargs);
+
+    /* allocate data for header and directory and initialize header */
+    image->data = base_malloc(data_offset);
+    image->size = data_offset;
+    memset(image->data, 0, T64_RECORDS_OFFSET);
     for (n = 0; n < nargs; n++) {
-        printf(".. adding '%s'\n", args[n]);
+        t64_record_t record;
+        uint8_t *data;
+        long len = fread_alloc(&data, args[n]);
+
+        printf(".. file '%s' is %ld ($%04lx) bytes\n",
+                args[n], len, (unsigned long)len);
+        if (len < 0) {
+            fprintf(stderr, "ooops");
+            base_free(data);
+            t64_free(image);
+            return NULL;
+        }
+
+        /* create directory record from file data */
+        memset(&record, 0, T64_RECORD_SIZE);
+        /* TODO: properly copy filename using the file's basename in PETSCII */
+        record.filename[n] = (uint8_t)(n + 0x30);
+        record.offset = data_offset;
+        record.start_addr = get_uint16(data);
+        printf(".. start address = $%04x\n", record.start_addr);
+        record.end_addr = (uint16_t)(len - 2 - 1 + record.start_addr);
+        printf(".. end address   = $%04x\n", record.end_addr);
+        record.real_end_addr = record.end_addr;
+        /* set C64S file type */
+        record.c64s_ftype = 0x01;
+        /* set CBMDOS type */
+        record.c1541_ftype = 0x02 | 0x80;   /* PRG */
+
+
+        /* copy data to image, then free */
+
+        /* realloc data after header + dir */
+        image->data = base_realloc(image->data, image->size + (size_t)len);
+        /* set load address */
+#if 0
+        set_uint16(image->data + image->size, record.start_addr);
+#endif
+        /* copy rest of data */
+        memcpy(image->data + image->size, data + 2, (size_t)(len - 2));
+        /* store data size */
+        record.offset = (uint32_t)image->size;
+        image->size += (size_t)len;
+        base_free(data);
+
+        /* store directory entry */
+        memcpy(image->records + n * T64_RECORD_SIZE,
+                &record,
+                T64_RECORD_SIZE);
+
+        printf(".. added '%s'\n", args[n]);
     }
+    image->rec_used = (uint16_t)n;
+    image->rec_max = (uint16_t)n ;
 
     return image;
 }
