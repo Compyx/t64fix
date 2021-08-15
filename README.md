@@ -1,6 +1,11 @@
 # t64fix
 
-Version 0.3
+Version 0.4.0
+
+## New in version 0.4.0
+
+Add `--create` command: create a T64 image and write one or more PRG files to it.
+
 
 ## Introduction
 
@@ -27,14 +32,15 @@ DESTINATION is fine, SOURCE is read into memory and then closed, so using
 
 More 'advanced' use is available through a few command line switches:
 
-| option                 | description                                         |
-| ---------------------- | ----------------------------------------------------|
-| -q/--quiet             | don't output anything to stdout, for use in scripts |
-| -e/--extract \<index\> | extract file \<index\> from image                   |
-| -x/--extract-all       | extract all files, except memory snapshots          |
-| -g/--groepaz           | use Groepaz' special algorithm for dealing with T64 |
-| --help                 | show help                                           |
-| --version              | show version info                                   |
+| Option                                  | Description                                         |
+| --------------------------------------- | ----------------------------------------------------|
+| -q/--quiet                              | don't output anything to stdout, for use in scripts |
+| -e/--extract \<index\>                  | extract file \<index\> from image                   |
+| -x/--extract-all                        | extract all files, except memory snapshots          |
+| -g/--groepaz                            | use Groepaz' special algorithm for dealing with T64 |
+| -c/--create \<image\> \<list-of-files\> | create t64 image and write on or more files to it   |
+| --help                                  | show help                                           |
+| --version                               | show version info                                   |
 
 
 The `--quiet` option tells t64fix to not output any information on stdout, it
@@ -94,4 +100,11 @@ them.
 Adding support for exporting to d64 is something I thought about and have
 decided to leave that to a library I'm writing. Better to write it once properly
 than multiple times half-assed.
+
+
+### Bugs/TODO
+
+- Implement quiet mode for the `--create` command.
+- Set a name for the image created by the `--create` command, either by using
+  the image's basename as a source or as an optional argument to the command.
 
