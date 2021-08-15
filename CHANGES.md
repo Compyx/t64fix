@@ -2,6 +2,10 @@
 
 A list of changes applied to the codebase, started too late as usual ;)
 
+### 2021-08-15
+
+* Finally finish the `--create` command.
+* Bump version to 0.4.0
 
 ### 2020-07-18
 
