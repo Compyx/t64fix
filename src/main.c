@@ -1,6 +1,6 @@
 /*
 t64fix - a small tool to correct T64 tape image files
-Copyright (C) 2016-2020  Bas Wassink <b.wassink@ziggo.nl>
+Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     const char **args;
     const char *infile;
 
-    if (!optparse_init(options, "t64fix", "0.3.2")) {
+    if (!optparse_init(options, "t64fix", "0.4.0")) {
         return EXIT_FAILURE;
     }
     optparse_set_prologue(help_prologue);

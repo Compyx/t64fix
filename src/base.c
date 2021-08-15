@@ -386,3 +386,46 @@ void *base_realloc(void *p, size_t n)
     }
     return tmp;
 }
+
+
+
+/** \brief  Test if character \a c is a path separator
+ *
+ * \param[in]   c   character to test
+ *
+ * \return  bool
+ */
+static bool is_path_separator(int c)
+{
+#ifdef _WIN32
+    return c == '/' || c == '\\';
+#else
+    return c == '/';
+#endif
+}
+
+
+/** \brief  Get basename component of \a path
+ *
+ * \return  pointer into \a path
+ */
+const char *base_basename(const char *path)
+{
+    const char *p;
+
+    if (path == NULL || *path == '\0') {
+        return path;
+    }
+
+    p = path + strlen(path) - 1;
+    while (p >= path && !is_path_separator(*p)) {
+        p--;
+    }
+
+    if (p < path) {
+        /* no path separator found */
+        return path;
+    } else {
+        return p + 1;
+    }
+}

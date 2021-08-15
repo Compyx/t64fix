@@ -86,5 +86,7 @@ void *          base_malloc(size_t n);
 void            base_free(void *p);
 void *          base_realloc(void *p, size_t n);
 
+const char *    base_basename(const char *path);
+
 #endif
 

@@ -33,6 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <errno.h>
 
 #include "base.h"
+#include "cbmdos.h"
+#include "petasc.h"
+
 #include "t64.h"
 
 
@@ -458,9 +461,9 @@ int t64_verify(t64_image_t *image, int quiet)
                     continue;
                 }
                 if (!quiet) {
-                    printf("t64fix: warning: reported size of $%04lx does not "
+                    printf("t64fix: %d: reported size of $%04lx does not "
                             "match actual size of $%04lx\n",
-                            (unsigned long)rec_size, (unsigned long)act_size);
+                            i, (unsigned long)rec_size, (unsigned long)act_size);
                 }
                 record->status = T64_REC_FIXED;
                 image->fixes++;
@@ -549,12 +552,10 @@ void t64_dump(const t64_image_t *image)
  */
 bool t64_write(t64_image_t *image, const char *path)
 {
-    int i;
-
     /* write corrected header in image data */
     t64_write_header(image);
 
-    for (i = 0; i < image->rec_used; i++) {
+    for (int i = 0; i < image->rec_used; i++) {
         t64_write_record(image->records + i,
                 image->data + T64_RECORDS_OFFSET + (i * T64_RECORD_SIZE));
     }
@@ -566,9 +567,15 @@ bool t64_write(t64_image_t *image, const char *path)
     return true;
 }
 
-/* }}} */
 
-
+/** \brief  Create T64 image and add files
+ *
+ * \param[in]   path    name of T64 image to create
+ * \param[in]   args    list of files to add
+ * \param[in]   nargs   number of elements in \a args
+ *
+ * \return  new T64 image instance or `NULL` on error
+ */
 t64_image_t *t64_create(const char *path, const char **args, int nargs)
 {
     t64_image_t *image;
@@ -596,12 +603,18 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
     /* allocate data for header and directory and initialize header */
     image->data = base_malloc(data_offset);
     image->size = data_offset;
-    memset(image->data, 0, T64_RECORDS_OFFSET);
+    memset(image->data, 0, data_offset);
+
+    /* add files to image */
     for (n = 0; n < nargs; n++) {
+
         t64_record_t record;
         uint8_t *data;
-        long len = fread_alloc(&data, args[n]);
+        uint8_t petname[CBMDOS_FILENAME_MAX];
+        const char *ascname;
+        long len;
 
+        len = fread_alloc(&data, args[n]);
         printf(".. file '%s' is %ld ($%04lx) bytes\n",
                 args[n], len, (unsigned long)len);
         if (len < 0) {
@@ -612,40 +625,37 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
         }
 
         /* create directory record from file data */
-        memset(&record, 0, T64_RECORD_SIZE);
-        /* TODO: properly copy filename using the file's basename in PETSCII */
-        record.filename[n] = (uint8_t)(n + 0x30);
-        record.offset = data_offset;
+        memset(&record, 0, sizeof(record));
+
+        /* set PETSCII filename using the file's ASCII basename */
+        ascname = base_basename(args[n]);
+        printf(".. basename = '%s'\n", ascname);
+        asc_to_pet_str(petname, ascname, CBMDOS_FILENAME_MAX);
+        memcpy(record.filename, petname, CBMDOS_FILENAME_MAX);
+
+        /* set start, end and end */
         record.start_addr = get_uint16(data);
         printf(".. start address = $%04x\n", record.start_addr);
-        record.end_addr = (uint16_t)(len - 2 - 1 + record.start_addr);
+        record.end_addr = (uint16_t)(len - 2 + record.start_addr);
         printf(".. end address   = $%04x\n", record.end_addr);
         record.real_end_addr = record.end_addr;
         /* set C64S file type */
-        record.c64s_ftype = 0x01;
-        /* set CBMDOS type */
-        record.c1541_ftype = 0x02 | 0x80;   /* PRG */
-
-
-        /* copy data to image, then free */
+        record.c64s_ftype = 0x01;   /* normal file */
+        /* set CBMDOS file type and flags */
+        record.c1541_ftype = CBMDOS_FILETYPE_PRG | CBMDOS_CLOSED_MASK;
 
         /* realloc data after header + dir */
-        image->data = base_realloc(image->data, image->size + (size_t)len);
-        /* set load address */
-#if 0
-        set_uint16(image->data + image->size, record.start_addr);
-#endif
-        /* copy rest of data */
+        image->data = base_realloc(image->data, image->size + (size_t)len - 2);
+        /* copy file data stripped of load address */
         memcpy(image->data + image->size, data + 2, (size_t)(len - 2));
         /* store data size */
         record.offset = (uint32_t)image->size;
-        image->size += (size_t)len;
+        image->size += (size_t)len - 2;
+        /* free file data */
         base_free(data);
 
-        /* store directory entry */
-        memcpy(image->records + n * T64_RECORD_SIZE,
-                &record,
-                T64_RECORD_SIZE);
+        /* store directory entry in t64 image instance, not its raw data */
+        memcpy(image->records + n, &record, sizeof(record));
 
         printf(".. added '%s'\n", args[n]);
     }
@@ -654,3 +664,6 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
 
     return image;
 }
+
+
+/* }}} */
