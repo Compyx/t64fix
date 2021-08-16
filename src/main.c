@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     }
 
 
-    /* handle Groapaz' special T64 fixing algorithm */
+    /* handle Groepaz' special T64 fixing algorithm */
     if (groepaz) {
         unlink(infile);
         return EXIT_SUCCESS;
@@ -173,17 +173,26 @@ int main(int argc, char *argv[])
 
     /* handle --create */
     if (create_file != NULL) {
-        printf("Kreator!\n");
         if (result < 1) {
             fprintf(stderr,
-                    "t64fix: error: --create requested but no input file(s) given.");
+                    "t64fix: error: `--create` requested but no input file(s) "
+                    "given.\n");
             optparse_exit();
             return EXIT_FAILURE;
         }
 
-        image = t64_create(create_file, args, result);
-        t64_write(image, create_file);
-        t64_free(image);
+        image = t64_create(create_file, args, result, quiet);
+        if (image != NULL) {
+            if (!t64_write(image, create_file)) {
+                fprintf(stderr,
+                        "t64fix: error: failed to write image '%s'\n",
+                        create_file);
+                t64_free(image);
+                optparse_exit();
+                return EXIT_FAILURE;
+            }
+            t64_free(image);
+        }
         optparse_exit();
         return EXIT_SUCCESS;
     }
@@ -193,6 +202,7 @@ int main(int argc, char *argv[])
         if (!quiet) {
             print_error();
         }
+        optparse_exit();
         return EXIT_FAILURE;
     }
     /* verify image and display results */

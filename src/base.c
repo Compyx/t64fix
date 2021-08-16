@@ -171,7 +171,7 @@ unsigned int num_blocks(unsigned int n)
  * An example:
  * @code{.c}
  *
- *  unsigned char *buf;
+ *  uint8_t *buf;
  *  long result = fread_alloc(&buf, "citadel.d64");
  *  if (result < 0) {
  *      printf("oops!\n");
@@ -199,17 +199,12 @@ long fread_alloc(uint8_t **dest, const char *path)
     errno = 0;
     *dest = NULL;
     fp = fopen(path, "rb");
-    if (!fp) {
+    if (fp == NULL) {
         t64_errno = T64_ERR_IO;
         return -1;
     }
 
-    buffer = malloc(FRA_BLOCK_SIZE);
-    if (!buffer) {
-        base_err_alloc(FRA_BLOCK_SIZE);
-        fclose(fp);
-        return -1;
-    }
+    buffer = base_malloc(FRA_BLOCK_SIZE);
 
     while (1) {
 #ifdef BASE_DEBUG
@@ -228,7 +223,7 @@ long fread_alloc(uint8_t **dest, const char *path)
                 if (bufread == 0) {
                     /* empty file: free buffer, dest is NULL so we're safe
                      * from free()'ing dest failing */
-                    free(buffer);
+                    base_free(buffer);
                 } else {
                     /* realloc buffer, if it fails we still have the data: */
                     tmp = realloc(buffer, bufread);
@@ -248,7 +243,7 @@ long fread_alloc(uint8_t **dest, const char *path)
             } else {
                 /* I/O error */
                 t64_errno = T64_ERR_IO;
-                free(buffer);
+                base_free(buffer);
                 fclose(fp);
                 return -1;
             }
@@ -259,14 +254,7 @@ long fread_alloc(uint8_t **dest, const char *path)
 #ifdef BASE_DEBUG
             printf("resizing buffer to %lu bytes\n", (unsigned long)bufsize);
 #endif
-            tmp = realloc(buffer, bufsize);
-            if (!tmp) {
-                base_err_alloc(bufsize);
-                free(buffer);
-                fclose(fp);
-                return -1;
-            }
-            buffer = tmp;
+            buffer = base_realloc(buffer, bufsize);
         }
     }
     assert(!"should not get here!");
@@ -360,6 +348,8 @@ void *base_malloc(size_t n)
 
 
 /** \brief  Free memory at \a p
+ *
+ * Wrapper around free() for symmetry with base_malloc()/base_realloc().
  *
  * \param[in]   p   memory to free
  */

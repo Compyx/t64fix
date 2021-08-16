@@ -573,18 +573,20 @@ bool t64_write(t64_image_t *image, const char *path)
  * \param[in]   path    name of T64 image to create
  * \param[in]   args    list of files to add
  * \param[in]   nargs   number of elements in \a args
+ * \param[in]   quiet   don't output anything on stdout
  *
  * \return  new T64 image instance or `NULL` on error
  */
-t64_image_t *t64_create(const char *path, const char **args, int nargs)
+t64_image_t *t64_create(const char *path, const char **args, int nargs, bool quiet)
 {
     t64_image_t *image;
     int n;
     uint32_t dir_size;
     uint32_t data_offset;
 
-
-    printf("Creating new t64 image '%s':\n", path);
+    if (!quiet) {
+        printf("Creating new t64 image '%s':\n", path);
+    }
     image = t64_new();
     if (image == NULL) {
         return NULL;    /* error already reported */
@@ -592,10 +594,14 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
 
     /* calculate directory size */
     dir_size = (unsigned int)nargs * T64_RECORD_SIZE;
-    printf(".. directory size = $%04x\n", (unsigned int)dir_size);
+    if (!quiet) {
+        printf(".. directory size = $%04x\n", (unsigned int)dir_size);
+    }
     /* calculate file data offset */
     data_offset = T64_RECORDS_OFFSET + dir_size;
-    printf(".. data offset = $%04x\n", (unsigned int)data_offset);
+    if (!quiet) {
+        printf(".. data offset = $%04x\n", (unsigned int)data_offset);
+    }
 
     /* allocate data for records */
     image->records = base_malloc(sizeof *(image->records) * (size_t)nargs);
@@ -615,10 +621,12 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
         long len;
 
         len = fread_alloc(&data, args[n]);
-        printf(".. file '%s' is %ld ($%04lx) bytes\n",
-                args[n], len, (unsigned long)len);
+        if (!quiet) {
+            printf(".. file '%s' is %ld ($%04lx) bytes\n",
+                   args[n], len, (unsigned long)len);
+        }
         if (len < 0) {
-            fprintf(stderr, "ooops");
+            fprintf(stderr, "t64fix: failed to read file '%s'.\n", args[n]);
             base_free(data);
             t64_free(image);
             return NULL;
@@ -629,16 +637,21 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
 
         /* set PETSCII filename using the file's ASCII basename */
         ascname = base_basename(args[n]);
+#if 0
         printf(".. basename = '%s'\n", ascname);
+#endif
         asc_to_pet_str(petname, ascname, CBMDOS_FILENAME_MAX);
         memcpy(record.filename, petname, CBMDOS_FILENAME_MAX);
 
-        /* set start, end and end */
+        /* set start, end and real_end */
         record.start_addr = get_uint16(data);
-        printf(".. start address = $%04x\n", record.start_addr);
         record.end_addr = (uint16_t)(len - 2 + record.start_addr);
-        printf(".. end address   = $%04x\n", record.end_addr);
         record.real_end_addr = record.end_addr;
+        if (!quiet) {
+            printf(".. start address = $%04x\n", record.start_addr);
+            printf(".. end address   = $%04x\n", record.end_addr);
+        }
+
         /* set C64S file type */
         record.c64s_ftype = 0x01;   /* normal file */
         /* set CBMDOS file type and flags */
@@ -657,8 +670,12 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs)
         /* store directory entry in t64 image instance, not its raw data */
         memcpy(image->records + n, &record, sizeof(record));
 
-        printf(".. added '%s'\n", args[n]);
+        if (!quiet) {
+            printf(".. added '%s'\n", ascname);
+        }
     }
+
+    /* set directory size and entry count */
     image->rec_used = (uint16_t)n;
     image->rec_max = (uint16_t)n ;
 
