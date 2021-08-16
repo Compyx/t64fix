@@ -39,12 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <assert.h>
 #include <errno.h>
 
-/* needed for `bool` typedef */
-#include "base.h"
-
 #include "optparse.h"
-
-
 
 
 /** @brief  Initial size of argument list

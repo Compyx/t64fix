@@ -30,8 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <unistd.h>
 
 #include "optparse.h"
-#include "t64.h"
 #include "prg.h"
+#include "t64.h"
 
 
 /** @brief  Quiet mode flag

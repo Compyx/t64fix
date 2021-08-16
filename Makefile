@@ -2,15 +2,15 @@
 VPATH=src
 CC=gcc
 LD=gcc
-VPATH=src
 
 INSTALL_PREFIX=/usr/local
 
-# -Wformat-signedness not in GCC < 5.0??
-CFLAGS=-Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
+# These flags are know to work with GCC >= 8.3.0
+CFLAGS=-W -Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
 	-Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes \
 	-Wswitch-default -Wswitch-enum -Wuninitialized -Wconversion \
-	-Wredundant-decls -Wnested-externs -Wunreachable-code \
+	-Wredundant-decls -Wnested-externs -Wunreachable-code -Wuninitialized \
+	-Wdiscarded-qualifiers -Wsign-compare \
 	-g -O3
 
 OBJS = main.o base.o cbmdos.o optparse.o petasc.o prg.o t64.o
@@ -21,6 +21,16 @@ DOCS=doc
 
 
 all: $(TARGET)
+
+# dependencies of objects
+base.o:
+cbmdos.o:
+main.o: optparse.o prg.o t64.o
+optparse.o:
+petasc.o:
+prg.o: base.o t64.h
+t64.o: base.o cbmdos.o petasc.o
+
 
 .PHONY: doc
 doc:
@@ -36,7 +46,7 @@ install:
 	cp $(TARGET) $(INSTALL_PREFIX)/bin
 
 
-# generic rule to build objects from sourcefiles
+# generic rule to build objects from source files
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 

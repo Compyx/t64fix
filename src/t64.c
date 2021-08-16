@@ -175,6 +175,9 @@ static void t64_write_header(t64_image_t *image)
     /* write the correct magic */
     memcpy(image->data + T64_HDR_MAGIC, c64s_magic, T64_HDR_MAGIC_LEN);
 
+    /* write tape name */
+    memcpy(image->data + T64_HDR_NAME, image->tapename, T64_HDR_NAME_LEN);
+
     /* write version */
     set_uint16(image->data + T64_HDR_VERSION, 0x101);
 
@@ -580,9 +583,12 @@ bool t64_write(t64_image_t *image, const char *path)
 t64_image_t *t64_create(const char *path, const char **args, int nargs, bool quiet)
 {
     t64_image_t *image;
-    int n;
     uint32_t dir_size;
     uint32_t data_offset;
+    const char *img_name;
+    const char *img_ext;
+    size_t img_name_len;
+    int n;
 
     if (!quiet) {
         printf("Creating new t64 image '%s':\n", path);
@@ -618,11 +624,12 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         uint8_t *data;
         uint8_t petname[CBMDOS_FILENAME_MAX];
         const char *ascname;
+        const char *ext;
         long len;
 
         len = fread_alloc(&data, args[n]);
         if (!quiet) {
-            printf(".. file '%s' is %ld ($%04lx) bytes\n",
+            printf(".. file '%s' is %ld ($%04lx) bytes.\n",
                    args[n], len, (unsigned long)len);
         }
         if (len < 0) {
@@ -636,9 +643,9 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         memset(&record, 0, sizeof(record));
 
         /* set PETSCII filename using the file's ASCII basename */
-        ascname = base_basename(args[n]);
+        ascname = base_basename(args[n], &ext);
 #if 0
-        printf(".. basename = '%s'\n", ascname);
+        printf(".. basename = '%s', ext = '%s'\n", ascname, ext);
 #endif
         asc_to_pet_str(petname, ascname, CBMDOS_FILENAME_MAX);
         memcpy(record.filename, petname, CBMDOS_FILENAME_MAX);
@@ -648,8 +655,8 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         record.end_addr = (uint16_t)(len - 2 + record.start_addr);
         record.real_end_addr = record.end_addr;
         if (!quiet) {
-            printf(".. start address = $%04x\n", record.start_addr);
-            printf(".. end address   = $%04x\n", record.end_addr);
+            printf(".... start address = $%04x\n", record.start_addr);
+            printf(".... end address   = $%04x\n", record.end_addr);
         }
 
         /* set C64S file type */
@@ -671,13 +678,55 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         memcpy(image->records + n, &record, sizeof(record));
 
         if (!quiet) {
-            printf(".. added '%s'\n", ascname);
+            printf(".... added '%s'\n", ascname);
         }
     }
 
     /* set directory size and entry count */
     image->rec_used = (uint16_t)n;
     image->rec_max = (uint16_t)n ;
+
+    /* set internal image name using the basename of the t64 file without
+     * extension:
+     */
+    img_name = base_basename(path, &img_ext);
+
+    /* T64's have their tape name padded with spaces, so clear the name by
+     * writing spaces:
+     */
+    memset(image->tapename, 0x20, T64_HDR_NAME_LEN);
+#if 0
+    printf("basename: '%s', extension: '%s'\n", img_name, img_ext);
+#endif
+    if (*img_ext == '\0') {
+        /* no extension */
+        img_name_len = strlen(img_name);
+    } else {
+        img_name_len = strlen(img_name) - strlen(img_ext) - 1;
+    }
+#if 0
+    printf("name len without ext = %"PRI_SIZE_T"\n", img_name_len);
+#endif
+    if (img_name_len > 0) {
+        /* copy at most 24 chars */
+        if (img_name_len > T64_HDR_NAME_LEN) {
+            img_name_len = T64_HDR_NAME_LEN;
+        }
+        memcpy(image->tapename, img_name, img_name_len);
+        if (!quiet) {
+            char tapename[T64_HDR_NAME_LEN + 1];
+
+            memset(tapename, 0, sizeof(tapename));
+            memcpy(tapename, img_name, img_name_len);
+            printf(".. setting tape name to '%s'.\n", tapename);
+        }
+    }
+
+    if (!quiet) {
+        printf(".. created new image with %d entries, "
+               "%"PRI_SIZE_T" ($%"PRI_XSIZE_T") bytes.\n",
+               n, image->size, image->size);
+    }
 
     return image;
 }

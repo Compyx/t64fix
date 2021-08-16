@@ -32,11 +32,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /** \def    PRI_SIZE_T
  * \brief   Format specifier hack for %zu on the shitshow called Windows
  */
+
+/** \def    PRI_XSIZE_T
+ * \brief   Format specifier hack for %zx on the shitshow called Windows
+ */
+
 #ifndef PRI_SIZE_T
 # ifdef _WIN32
 #  define PRI_SIZE_T    "Iu"
+#  define PRI_XSIZE_T   "Ix"
 # else
 #  define PRI_SIZE_T    "zu"
+#  define PRI_XSIZE_T   "zx"
 # endif
 #endif
 
@@ -86,7 +93,7 @@ void *          base_malloc(size_t n);
 void            base_free(void *p);
 void *          base_realloc(void *p, size_t n);
 
-const char *    base_basename(const char *path);
+const char *    base_basename(const char *path, const char **ext);
 
 #endif
 

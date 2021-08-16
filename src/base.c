@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "base.h"
 
+/* #define BASE_DEBUG */
 
 /** @brief  Block size for fread_alloc()
  *
@@ -40,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * a file. For most C64 emulator file formats, such as T64, a small block size
  * should be enough.
  */
-#define FRA_BLOCK_SIZE  (1<<16)
+#define FRA_BLOCK_SIZE  (1UL<<16)
 
 
 /** @brief  Global error code
@@ -395,27 +396,58 @@ static bool is_path_separator(int c)
 }
 
 
-/** \brief  Get basename component of \a path
+/** \brief  Get basename component of path
+ *
+ * Get basename of \a path and optionally provide a pointer the extension of
+ * the file, if any, when \a ext is not `NULL`.
+ *
+ * If no extension if found \a *ext will point to the end of \a path. 
+ *
+ * \param[in]   path    path to scan for basename and extension
+ * \param[out]  ext     object to store pointer to extension, pass `NULL` to
+ *                      ommit scanning for extension
  *
  * \return  pointer into \a path
  */
-const char *base_basename(const char *path)
+const char *base_basename(const char *path, const char **ext)
 {
     const char *p;
+    const char *end;
 
     if (path == NULL || *path == '\0') {
         return path;
     }
 
-    p = path + strlen(path) - 1;
+    /* remember the end pointer for the extension scanning later */
+    p = end = path + strlen(path) - 1;
     while (p >= path && !is_path_separator(*p)) {
         p--;
     }
 
     if (p < path) {
         /* no path separator found */
-        return path;
+        p = path;
     } else {
-        return p + 1;
+        p++;
     }
+
+    /* do we need to scan for extension? */
+    if (ext != NULL) {
+        const char *x = end;
+
+        while (x >= p) {
+            if (*x == '.') {
+                break;
+            }
+            x--;
+        }
+        if (x < p) {
+            /* no extension found, point to the end of the string */
+            *ext = end;
+        } else {
+            *ext = x + 1;   /* point to after the dot */
+        }
+    }
+
+    return p;
 }
