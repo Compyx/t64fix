@@ -94,7 +94,7 @@ const char *t64_strerror(int code)
 int base_err_alloc(size_t n)
 {
     t64_errno = T64_ERR_OOM;
-    return fprintf(stderr, "failed to allocate %"PRI_SIZE_T" bytes\n", n);
+    return fprintf(stderr, "failed to allocate %zu bytes\n", n);
 }
 
 
@@ -209,12 +209,12 @@ long fread_alloc(uint8_t **dest, const char *path)
 
     while (1) {
 #ifdef BASE_DEBUG
-        printf("requesting %"PRI_SIZE_T" bytes: ", FRA_BLOCK_SIZE);
+        printf("requesting %zu bytes: ", FRA_BLOCK_SIZE);
         fflush(stdout);
 #endif
         result = fread(buffer + bufread, 1, FRA_BLOCK_SIZE, fp);
 #ifdef BASE_DEBUG
-        printf("got %"PRI_SIZE_T" bytes\n", result);
+        printf("got %zu bytes\n", result);
 #endif
         if (result < FRA_BLOCK_SIZE) {
             /* end of file ? */
@@ -236,7 +236,7 @@ long fread_alloc(uint8_t **dest, const char *path)
                     }
                     *dest = buffer;
 #ifdef BASE_DEBUG
-                    printf("reallocated to %"PRI_SIZE_T" bytes\n", bufsize);
+                    printf("reallocated to %zu bytes\n", bufsize);
 #endif
                 }
                 fclose(fp);

@@ -29,24 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdint.h>
 #include <stdbool.h>
 
-/** \def    PRI_SIZE_T
- * \brief   Format specifier hack for %zu on the shitshow called Windows
- */
-
-/** \def    PRI_XSIZE_T
- * \brief   Format specifier hack for %zx on the shitshow called Windows
- */
-
-#ifndef PRI_SIZE_T
-# ifdef _WIN32
-#  define PRI_SIZE_T    "Iu"
-#  define PRI_XSIZE_T   "Ix"
-# else
-#  define PRI_SIZE_T    "zu"
-#  define PRI_XSIZE_T   "zx"
-# endif
-#endif
-
 
 /** @brief Error codes
  */

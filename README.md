@@ -37,7 +37,6 @@ More 'advanced' use is available through a few command line switches:
 | -q/--quiet                              | don't output anything to stdout, for use in scripts |
 | -e/--extract \<index\>                  | extract file \<index\> from image                   |
 | -x/--extract-all                        | extract all files, except memory snapshots          |
-| -g/--groepaz                            | use Groepaz' special algorithm for dealing with T64 |
 | -c/--create \<image\> \<list-of-files\> | create t64 image and write on or more files to it   |
 | --help                                  | show help                                           |
 | --version                               | show version info                                   |
@@ -104,7 +103,7 @@ than multiple times half-assed.
 
 ### Bugs/TODO
 
-- Implement quiet mode for the `--create` command.
 - Set a name for the image created by the `--create` command, either by using
   the image's basename as a source or as an optional argument to the command.
+  (Currently the image's basename excluding extension is used)
 

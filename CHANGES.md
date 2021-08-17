@@ -2,14 +2,26 @@
 
 A list of changes applied to the codebase, started too late as usual ;)
 
+
+### 2021-08-17
+
+* Remove Windows-specific hacks for %zu and %zx format specifiers.
+* Remove Makefile.win, the normal Makefile runs fine in MSys2.
+* Remove `-g` command.
+* Update README.
+* Update copyright lines.
+
+
 ### 2021-08-15
 
 * Finally finish the `--create` command.
 * Bump version to 0.4.0
 
+
 ### 2020-07-18
 
 * Update copyright to 2020
+
 
 ### 2018-06-06
 

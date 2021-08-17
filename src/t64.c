@@ -705,7 +705,7 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         img_name_len = strlen(img_name) - strlen(img_ext) - 1;
     }
 #if 0
-    printf("name len without ext = %"PRI_SIZE_T"\n", img_name_len);
+    printf("name len without ext = %zu\n", img_name_len);
 #endif
     if (img_name_len > 0) {
         /* copy at most 24 chars */
@@ -724,12 +724,11 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
 
     if (!quiet) {
         printf(".. created new image with %d entries, "
-               "%"PRI_SIZE_T" ($%"PRI_XSIZE_T") bytes.\n",
+               "%zu ($%zx) bytes.\n",
                n, image->size, image->size);
     }
 
     return image;
 }
-
 
 /* }}} */

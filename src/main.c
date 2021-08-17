@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <string.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 #include "optparse.h"
 #include "prg.h"
@@ -58,11 +57,6 @@ static long extract = -1;
 static bool extract_all = 0;
 
 
-/** \brief  Groepaz' algorithm for T64 files
- */
-static bool groepaz = false;
-
-
 /** \brief  T64 archive to create
  */
 static const char *create_file = NULL;
@@ -71,19 +65,23 @@ static const char *create_file = NULL;
 /** @brief  Command line options
  */
 option_decl_t options[] = {
-    { 'q', "quiet", &quiet, OPT_BOOL, "don't output to stdout/stderr" },
-    { 'e', "extract", &extract, OPT_INT, "extract program file" },
-    { 'o', "output", &outfile, OPT_STR, "write fixed file to <outfile>" },
+    { 'q', "quiet", &quiet, OPT_BOOL,
+        "don't output to stdout/stderr" },
+    { 'e', "extract", &extract, OPT_INT,
+        "extract program file" },
+    { 'o', "output", &outfile, OPT_STR,
+        "write fixed file to <outfile>" },
     { 'x', "extract-all", &extract_all, OPT_BOOL,
         "extract all program files" },
-    { 'g', "groepaz", &groepaz, OPT_BOOL,
-        "groepaz' way of dealing with t64's" },
-    { 'c', "create", &create_file, OPT_STR, "create T64 image" },
+    { 'c', "create", &create_file, OPT_STR,
+        "create T64 image from a list of PRG files" },
 
     { 0, NULL, NULL, 0, NULL }
 };
 
 
+/** \brief  Print help output prologue
+ */
 static void help_prologue(void)
 {
     printf("Examples:\n\n");
@@ -157,21 +155,15 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-
+    /* get list of non-option command line args */
     args = optparse_args();
     infile = args[0];
     if (outfile == NULL && result > 1) {
+        /* support `t64fix <infile> <outfile>` syntax */
         outfile = args[1];
     }
 
-
-    /* handle Groepaz' special T64 fixing algorithm */
-    if (groepaz) {
-        unlink(infile);
-        return EXIT_SUCCESS;
-    }
-
-    /* handle --create */
+    /* handle --create command */
     if (create_file != NULL) {
         if (result < 1) {
             fprintf(stderr,
@@ -187,6 +179,7 @@ int main(int argc, char *argv[])
                 fprintf(stderr,
                         "t64fix: error: failed to write image '%s'\n",
                         create_file);
+                print_error();
                 t64_free(image);
                 optparse_exit();
                 return EXIT_FAILURE;
