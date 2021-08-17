@@ -196,6 +196,15 @@ static int handle_option(option_decl_t *option, const char *arg)
             break;
         case OPT_STR:
             if (arg == NULL) {
+                if (option->name_short > 0) {
+                    fprintf(stderr,
+                            "%s: Error: option -%c' requires an argument\n",
+                            prg_name, option->name_short);
+                } else {
+                    fprintf(stderr,
+                            "%s: Error: option '--%s' requires an argument\n",
+                            prg_name, option->name_long);
+                }
                 return -1;
             }
             *((const char **)(option->value)) = arg;
