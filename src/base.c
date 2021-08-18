@@ -88,14 +88,14 @@ const char *t64_strerror(int code)
  *
  * \param[in]   n   number of bytes requested to malloc(3) or realloc(3)
  *
- * \return  number of characters printed on stderr
- *
- * \note    sets t64_errno to `T64_ERR_OOM`
+ * \note    Sets t64_errno to `T64_ERR_OOM`, which is only useful for debuggers
+ *          since abort() is called right after printing the message.
  */
-int base_err_alloc(size_t n)
+static void base_err_alloc(size_t n)
 {
     t64_errno = T64_ERR_OOM;
-    return fprintf(stderr, "failed to allocate %zu bytes\n", n);
+    fprintf(stderr, "failed to allocate %zu bytes, calling abort\n", n);
+    abort();
 }
 
 
@@ -346,7 +346,6 @@ void *base_malloc(size_t n)
     void *p = malloc(n);
     if (p == NULL) {
         base_err_alloc(n);
-        abort();
     }
     return p;
 }
@@ -379,11 +378,9 @@ void *base_realloc(void *p, size_t n)
 
     if (tmp == NULL) {
         base_err_alloc(n);
-        abort();
     }
     return tmp;
 }
-
 
 
 /** \brief  Test if character \a c is a path separator

@@ -53,8 +53,6 @@ typedef enum t64_error_code_t {
 extern int      t64_errno;
 
 
-int             base_err_alloc(size_t n);
-
 uint16_t        get_uint16(const uint8_t *p);
 void            set_uint16(uint8_t *p, uint16_t v);
 uint32_t        get_uint32(const uint8_t *p);
