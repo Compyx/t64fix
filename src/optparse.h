@@ -17,15 +17,15 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/** @file   optparse.h
- * @brief   Header for optparse
+/** 'file   optparse.h
+ * \brief   Header for optparse
  */
 
 #ifndef HAVE_OPTPARSE_H
 #define HAVE_OPTPARSE_H
 
 
-/** @brief  optparse_exec() exit codes
+/** \brief  optparse_exec() exit codes
  */
 enum {
     OPT_EXIT_ERROR = -1,        /**< error during parsing */
@@ -33,7 +33,7 @@ enum {
     OPT_EXIT_VERSION = -3       /**< --version encountered and handled */
 };
 
-/** @brief  Option type enum
+/** \brief  Option type enum
  */
 typedef enum {
     OPT_BOOL,   /**< boolean option */
@@ -42,14 +42,16 @@ typedef enum {
 } option_type_t;
 
 
+/** \brief  Error coce for the parser
+ */
 enum {
-    OPT_ERR_MISSING_ARG,
-    OPT_ERR_INVALID_ARG
+    OPT_ERR_MISSING_ARG,    /**< option requires argument, but none was given */
+    OPT_ERR_INVALID_ARG     /**< the argument for the option is invalid */
 };
 
 
 
-/** @brief  Option declaration type
+/** \brief  Option declaration type
  */
 typedef struct option_decl_s {
     int             name_short; /**< short option name */
@@ -60,7 +62,7 @@ typedef struct option_decl_s {
 } option_decl_t;
 
 
-int             optparse_init(option_decl_t *option_list,
+int             optparse_init(const option_decl_t *option_list,
                               const char *name,
                               const char *version);
 int             optparse_exec(int argc, char *argv[]);

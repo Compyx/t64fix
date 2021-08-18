@@ -18,11 +18,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /** @file   prg.c
- * @brief   Extracting PRG files
+ * \brief   Extracting PRG files
  *
- * Functions to extract program (*.prg) files from t64 images. 'Frozen' files
- * ('frz') are skipped, these are snapshots of the C64S emulator and nobody
- * in their right mind would use that emulator today.
+ * Functions to extract program (*.prg) files from t64 images.
+ *
+ * 'Frozen' files ("frz") are skipped: these are snapshots of the C64S emulator
+ * and nobody in their right mind would use that emulator today.
  */
 
 #include <stdio.h>
@@ -37,15 +38,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "prg.h"
 
 
-/** @brief  Extract prg file at \a index from \a image
+/** \brief  Extract prg file at \a index from \a image
  *
- * @param   image   t64 image
- * @param   index   index in \a image of file to extract
- * @param   quiet   don't output anything to stdout/stderr
+ * \param[in]   image   t64 image
+ * \param[in]   index   index in \a image of file to extract
+ * \param[in]   quiet   don't output anything to stdout/stderr
  *
- * @todo:   Needs proper PETSCII to ASCII translation
+ * \todo    Needs proper PETSCII to ASCII translation
  *
- * @return  bool
+ * \return  bool
  */
 bool prg_extract(const t64_image_t *image, int index, int quiet)
 {
@@ -88,12 +89,12 @@ bool prg_extract(const t64_image_t *image, int index, int quiet)
 }
 
 
-/** @brief  Extract all files
+/** \brief  Extract all files
  *
- * @param   image   t64 image
- * @param   quiet   don't output information on stdout/stderr
+ * \param[in]   image   t64 image
+ * \param[in]   quiet   don't output information on stdout/stderr
  *
- * @return  bool
+ * \return  bool
  */
 bool prg_extract_all(const t64_image_t *image, int quiet)
 {
@@ -118,4 +119,3 @@ bool prg_extract_all(const t64_image_t *image, int quiet)
     }
     return true;
 }
-

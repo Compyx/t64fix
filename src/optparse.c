@@ -16,7 +16,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /** @file   optparse.c
  *
- * @brief   Simplified command line parser
+ * \brief   Simplified command line parser
  *
  * This command line parser is a severly simplified version of one I wrote for
  * my assembler project. It only supports short and long options of three types:
@@ -42,55 +42,61 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "optparse.h"
 
 
-/** @brief  Initial size of argument list
+/** \brief  Initial size of argument list
  *
  * The argument list gets doubled in size whenever it's full
  */
 #define ARGLIST_INIT    64
 
 
-/** @brief  Program name
+/*
+ * Static variables
+ */
+
+/** \brief  Program name
  *
  * String used in help and version messages
  */
 static const char *prg_name = NULL;
 
-/** @brief  Program version
+/** \brief  Program version
  *
  * String used in version message
  */
 static const char *prg_version = NULL;
 
-/** @brief  Prologue function for --help
+/** \brief  Prologue function for --help
  */
 static void (*prologue_cb)(void);
 
-
-/** @brief  List of available options
+/** \brief  List of available options
  */
-static option_decl_t *options;
+static const option_decl_t *options;
 
-
-/** @brief  Argument list
+/** \brief  Argument list
  *
  * Collection of command line arguments not used as option arguments
  */
 static const char **arglist;
 
-
-/** @brief  Number of elements used in the argument list
+/** \brief  Number of elements used in the argument list
  */
 static size_t arglist_used;
 
 
-/** @brief  Number of elements available in the argument list
+/** \brief  Number of elements available in the argument list
  */
 static size_t arglist_size;
 
 
-/** @brief  Initialize argument list
+
+/*
+ * Private API
+ */
+
+/** \brief  Initialize argument list
  *
- * @return  bool
+ * \return  bool
  */
 static int arglist_init(void)
 {
@@ -101,7 +107,7 @@ static int arglist_init(void)
 }
 
 
-/** @brief  Free argument list
+/** \brief  Free argument list
  */
 static void arglist_free(void)
 {
@@ -109,9 +115,11 @@ static void arglist_free(void)
 }
 
 
-/** @brief  Add argument to argument list
+/** \brief  Add argument to argument list
  *
- * @param   arg argument (element from argv)
+ * \param[in]   arg argument (element from argv)
+ *
+ * \return  1 on success 0 on failure
  */
 static int arglist_add_arg(const char *arg)
 {
@@ -129,16 +137,16 @@ static int arglist_add_arg(const char *arg)
 }
 
 
-/** @brief  Find option by \a name_short short or \a name_long
+/** \brief  Find option by \a name_short short or \a name_long
  *
- * @param   name_short  short option name
- * @param   name_long   long option name
+ * \param[in]   name_short  short option name
+ * \param[in]   name_long   long option name
  *
- * @return  option or NULL when not found
+ * \return  option or NULL when not found
  */
-static option_decl_t *find_option(int name_short, const char *name_long)
+static const option_decl_t *find_option(int name_short, const char *name_long)
 {
-    option_decl_t *opt = options;
+    const option_decl_t *opt = options;
 
     while (opt->name_short != 0 || opt->name_long != NULL) {
         if ((name_short != 0 && opt->name_short == name_short) ||
@@ -150,26 +158,33 @@ static option_decl_t *find_option(int name_short, const char *name_long)
     return NULL;
 }
 
-/** @brief  Handle \a option
+
+/** \brief  Handle an option
  *
- * Handles \a option. Returns delta in argv, 0 for boolean options, 1 for
- * non-boolean (int/str) options.
+ * Handles \a option.
  *
- * @param   option  option record
- * @param   arg     optional argument for option
+ * Returns delta in argv, 0 for boolean options, 1 for non-boolean (int/str)
+ * options.
  *
- * @return  delta to add to index in argv (0 or 1) or -1 on error
+ * \param[in]   option  option record
+ * \param[in]   arg     optional argument for option
+ *
+ * \return  delta to add to index in argv (0 or 1) or -1 on error
  */
-static int handle_option(option_decl_t *option, const char *arg)
+static int handle_option(const option_decl_t *option, const char *arg)
 {
     char *endptr;
     int delta = 0;
 
     switch (option->type) {
+
         case OPT_BOOL:
+            /* boolean option, no argument */
             *((bool *)(option->value)) = 1;
             break;
+
         case OPT_INT:
+            /* integer option, single argument */
             if (arg == NULL) {
                 if (option->name_short > 0) {
                     fprintf(stderr,
@@ -182,19 +197,22 @@ static int handle_option(option_decl_t *option, const char *arg)
                 }
                 return -1;
             }
+            /* try to convert argument to long int */
             errno = 0;
             *((long *)(option->value)) = strtol(arg, &endptr, 0);
             /* check for invalid crap */
             if (endptr == arg || errno == ERANGE) {
                 fprintf(stderr,
-                        "%s: Error: failed to convert option argument to int: '%s'\n",
+                        "%s: Error: failed to convert option argument "
+                        "to int: '%s'\n",
                         prg_name, arg);
                 return -1;
             }
-
             delta = 1;
             break;
+
         case OPT_STR:
+            /* string option, single argument */
             if (arg == NULL) {
                 if (option->name_short > 0) {
                     fprintf(stderr,
@@ -210,7 +228,9 @@ static int handle_option(option_decl_t *option, const char *arg)
             *((const char **)(option->value)) = arg;
             delta = 1;
             break;
+
         default:
+            /* option type not recognized */
             fprintf(stderr, "%s: illegal option type %d\n",
                     prg_name, option->type);
             return -1;
@@ -219,26 +239,31 @@ static int handle_option(option_decl_t *option, const char *arg)
 }
 
 
-/** @brief  Print \a option information on stdout
+/** \brief  Print option information on stdout
  *
- * TODO:    Needs work, for example adding ARG and perhaps ARG description,
- *          not to mention proper indentation, not using fucking TABS's
+ * Print the data of \a option on stdout for the `--help` option.
  *
- * @param   option  option declaration
+ * \todo    Needs work, for example adding ARG and perhaps ARG description.
  *
- * @return  number of characters printed on stdout
+ * \param[in]   option  option declaration
+ *
+ * \return  number of characters printed on stdout
  */
-static int print_option(option_decl_t *option)
+static int print_option(const option_decl_t *option)
 {
-    return printf("  -%c, --%-20s%s\n", option->name_short, option->name_long,
-                option->desc);
+    return printf("  -%c, --%-20s%s\n",
+                  option->name_short,
+                  option->name_long,
+                  option->desc);
 }
 
-/** @brief  Display usage message and options list
+/** \brief  Display usage message and options list
+ *
+ * Print usage, optional prologue and list of option descriptions.
  */
 void optparse_help(void)
 {
-    option_decl_t *opt = options;
+    const option_decl_t *opt = options;
 
     printf("Usage: %s [options] [arguments]\n\n", prg_name);
     if (prologue_cb != NULL) {
@@ -253,7 +278,7 @@ void optparse_help(void)
 }
 
 
-/** @brief  Display program name and version
+/** \brief  Display program name and version
  */
 static void optparse_version(void)
 {
@@ -261,17 +286,17 @@ static void optparse_version(void)
 }
 
 
-/** @brief  Initialize the option parser
+/** \brief  Initialize the option parser
  *
- * @param   option_list list of options available
- * @param   name        program name for use in messages
- * @param   version     program version for use in messages
+ * \param[in]   option_list list of options available
+ * \param[in]   name        program name for use in messages
+ * \param[in]   version     program version for use in messages
  *
- * @return  bool
+ * \return  bool
  */
-int optparse_init(option_decl_t *option_list,
-                   const char *name,
-                   const char *version)
+int optparse_init(const option_decl_t *option_list,
+                  const char *name,
+                  const char *version)
 {
     int result;
     options = option_list;
@@ -293,12 +318,12 @@ int optparse_init(option_decl_t *option_list,
 }
 
 
-/** @brief  Execute option parser
+/** \brief  Execute option parser
  *
- * @param   argc    argument count (from main)
- * @param   argv    argument vector (from main)
+ * \param[in]   argc    argument count (from main)
+ * \param[in]   argv    argument vector (from main)
  *
- * @return  number of arguments remaining
+ * \return  number of arguments remaining
  */
 int optparse_exec(int argc, char *argv[])
 {
@@ -338,7 +363,7 @@ int optparse_exec(int argc, char *argv[])
                 return OPT_EXIT_ERROR;
             }
         } else {
-            option_decl_t *opt;
+            const option_decl_t *opt;
 #ifdef OPTPARSE_DEBUG
             printf("%s:%d: found possible option: '%s'\n",
                     __FILE__, __LINE__, arg);
@@ -368,7 +393,11 @@ int optparse_exec(int argc, char *argv[])
 }
 
 
-/** @brief  Clean up
+/** \brief  Clean up memory used by parser
+ *
+ * Free the non-option argument list.
+ *
+ * This needs to be called when the user is done with the argument list.
  */
 void optparse_exit(void)
 {
@@ -376,16 +405,18 @@ void optparse_exit(void)
 }
 
 
-/** @brief  Get argument list
+/** \brief  Get argument list
  *
  * This returns a pointer to a list of elements of argv which were not used
- * during parsing. Do NOT free the pointers in this list, they are copies of
- * pointers in argv, and as such will be cleaned up when the program exits.
+ * during parsing.
+ *
+ * Do NOT free the pointers in this list, they are copies of pointers in argv,
+ * and as such will be cleaned up when the program exits.
  *
  * The list is not NULL-terminated, so use the value returned by optparse_exec()
  * for the list size.
  *
- * @return  list of arguments
+ * \return  list of arguments
  */
 const char **optparse_args(void)
 {
@@ -393,8 +424,13 @@ const char **optparse_args(void)
 }
 
 
+/** \brief  Set the prologue function
+ *
+ * Set the function to print text between the usage message and the options list.
+ *
+ * \param[in]   func    function to call during `--help` handlin
+ */
 void optparse_set_prologue(void (*func)(void))
 {
     prologue_cb = func;
 }
-

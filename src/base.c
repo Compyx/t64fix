@@ -17,9 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/** @file   base.c
+/** \file   base.c
  *
- * @brief   Base functions
+ * \brief   Base functions, such as memory allocation, I/O, and error messages.
  */
 
 #include <stdlib.h>
@@ -35,7 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* #define BASE_DEBUG */
 
-/** @brief  Block size for fread_alloc()
+
+/** \brief  Block size for fread_alloc()
  *
  * This size is used to allocate memory in fread_alloc() and read chunks from
  * a file. For most C64 emulator file formats, such as T64, a small block size
@@ -44,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define FRA_BLOCK_SIZE  (1UL<<16)
 
 
-/** @brief  Global error code
+/** \brief  Global error code
  *
  * If this is set to T64_ERR_IO, the C library `errno` will contain further
  * information on what happened.
@@ -52,9 +53,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 int t64_errno;
 
 
-/** @brief  Error messages
+/** \brief  Error messages
  *
- * @note    message for error code 0 has index 1, message at index 0 is for
+ * \note    message for error code 0 has index 1, message at index 0 is for
  *          invalid error codes
  */
 static const char *t64_err_msgs[] = {
@@ -67,11 +68,11 @@ static const char *t64_err_msgs[] = {
 };
 
 
-/** @brief  Get error message for \a code
+/** \brief  Get error message for \a code
  *
- * @param   code    error code
+ * \param[in]   code    error code
  *
- * @return  message for \a code
+ * \return  message for \a code
  */
 const char *t64_strerror(int code)
 {
@@ -83,13 +84,13 @@ const char *t64_strerror(int code)
 
 
 
-/** @brief  Print out-of-memory message on stderr
+/** \brief  Print out-of-memory message on stderr
  *
- * @param   n   number of bytes requested to malloc(3) or realloc(3)
+ * \param[in]   n   number of bytes requested to malloc(3) or realloc(3)
  *
- * @return  number of characters printed on stderr
+ * \return  number of characters printed on stderr
  *
- * @note    sets t64_errno to `T64_ERR_OOM`
+ * \note    sets t64_errno to `T64_ERR_OOM`
  */
 int base_err_alloc(size_t n)
 {
@@ -98,11 +99,11 @@ int base_err_alloc(size_t n)
 }
 
 
-/** @brief  Read unsigned 16-bit little endian value
+/** \brief  Read unsigned 16-bit little endian value
  *
- * @param   p   data containing the value
+ * \param[in]   p   data containing the value
  *
- * @return  unsigned 16-bit little endian value
+ * \return  unsigned 16-bit little endian value
  */
 uint16_t get_uint16(const uint8_t *p)
 {
@@ -110,10 +111,10 @@ uint16_t get_uint16(const uint8_t *p)
 }
 
 
-/** @brief  Write 16-bit little endian value
+/** \brief  Write 16-bit little endian value
  *
- * @param   p   destination of value
- * @param   v   unsigned 16-bit value
+ * \param[out]   p   destination of value
+ * \param[in]    v   unsigned 16-bit value
  */
 void set_uint16(uint8_t *p, uint16_t v)
 {
@@ -123,11 +124,11 @@ void set_uint16(uint8_t *p, uint16_t v)
 
 
 
-/** @brief  Read unsigned 32-bit little endian value
+/** \brief  Read unsigned 32-bit little endian value
  *
- * @param   p   data containing the value
+ * \param[in]   p   data containing the value
  *
- * @return  unsigned 32-bit little endian value
+ * \return  unsigned 32-bit little endian value
  */
 uint32_t get_uint32(const uint8_t *p)
 {
@@ -135,10 +136,10 @@ uint32_t get_uint32(const uint8_t *p)
 }
 
 
-/** @brief  Write 32-bit little endian value
+/** \brief  Write 32-bit little endian value
  *
- * @param   p   destination of value
- * @param   v   unsigned 16-bit value
+ * \param[out]  p   destination of value
+ * \param[in]   v   unsigned 16-bit value
  */
 void set_uint32(uint8_t *p, uint32_t v)
 {
@@ -148,10 +149,14 @@ void set_uint32(uint8_t *p, uint32_t v)
 }
 
 
-
-/** @brief  Calculate number of 'blocks' for \a n
+/** \brief  Calculate number of 'blocks' for number of bytes \a n
  *
- * @param   n   value
+ * Calculate how many block on a floppy \a n bytes would take.
+ *
+ * The result is rounded up, one byte in a block results in that entire block
+ * being used, like the floppy drives do.
+ *
+ * \param[in]   n   number of bytes
  */
 unsigned int num_blocks(unsigned int n)
 {
@@ -159,8 +164,7 @@ unsigned int num_blocks(unsigned int n)
 }
 
 
-
-/** @brief  Read file into memory
+/** \brief  Read file into memory
  *
  * This function reads data from file \a path into \a dest, allocating memory
  * while doing so.
@@ -170,7 +174,7 @@ unsigned int num_blocks(unsigned int n)
  * empty file be read, \*dest is also set to NULL and the buffer used is freed.
  *
  * An example:
- * @code{.c}
+ * \code{.c}
  *
  *  uint8_t *buf;
  *  long result = fread_alloc(&buf, "citadel.d64");
@@ -181,12 +185,12 @@ unsigned int num_blocks(unsigned int n)
  *      free(buf);
  *  }
  *
- * @endcode
+ * \endcode
  *
- * @param   dest    pointer to memory to store buffer pointer
- * @param   path    path to file
+ * \param[out]  dest    pointer to memory to store buffer pointer
+ * \param[in]   path    path to file
  *
- * @returns size of buffer allocated, or -1 on error
+ * \returns size of buffer allocated, or -1 on error
  */
 long fread_alloc(uint8_t **dest, const char *path)
 {
@@ -263,13 +267,13 @@ long fread_alloc(uint8_t **dest, const char *path)
 }
 
 
-/** @brief  Wrapper around fwrite(3)
+/** \brief  Wrapper around fwrite(3)
  *
- * @param   path    filename/path
- * @param   data    data to write to \a path
- * @param   size    number of bytes of \a data to write
+ * \param   path    filename/path
+ * \param   data    data to write to \a path
+ * \param   size    number of bytes of \a data to write
  *
- * @return  bool
+ * \return  bool
  */
 bool fwrite_wrapper(const char *path, const uint8_t *data, size_t size)
 {
@@ -288,17 +292,16 @@ bool fwrite_wrapper(const char *path, const uint8_t *data, size_t size)
 }
 
 
-/** @brief  Write a prg file to the OS
+/** \brief  Write a prg file to the OS
  *
- * @param   path    path of file
- * @param   data    program file data, excluding start address
- * @param   size    size of program file data, excluding start address
- * @param   start   start address to use for program file
+ * \param   path    path of file
+ * \param   data    program file data, excluding start address
+ * \param   size    size of program file data, excluding start address
+ * \param   start   start address to use for program file
  *
- * @return  bool
+ * \return  bool
  */
-bool fwrite_prg(const char *path, const uint8_t *data, size_t size,
-        int start)
+bool fwrite_prg(const char *path, const uint8_t *data, size_t size, int start)
 {
     bool result = false;
     FILE *fd = fopen(path, "wb");
@@ -330,19 +333,20 @@ fwrite_prg_exit:
  * Memory allocation functions, akin to xmalloc()
  */
 
-
 /** \brief  Allocate \a n bytes on the heap
  *
  * \param[in]   n   number of bytes to allocate
  *
  * \return  pointer to allocated memory
+ *
+ * \note    calls abort() on error to allow use of a debugger.
  */
 void *base_malloc(size_t n)
 {
     void *p = malloc(n);
     if (p == NULL) {
         base_err_alloc(n);
-        exit(1);
+        abort();
     }
     return p;
 }
@@ -366,6 +370,8 @@ void base_free(void *p)
  * \param[in]   n   new size of \a p
  *
  * \return  pointer to reallocated memory
+ *
+ * \note    calls abort() on error to allow use of a debugger.
  */
 void *base_realloc(void *p, size_t n)
 {
@@ -373,7 +379,7 @@ void *base_realloc(void *p, size_t n)
 
     if (tmp == NULL) {
         base_err_alloc(n);
-        exit(1);
+        abort();
     }
     return tmp;
 }

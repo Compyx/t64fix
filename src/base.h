@@ -17,9 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/** @file   base.c
+/** \file   base.c
  *
- * @brief   Base functions
+ * \brief   Base functions
  */
 
 #ifndef BASE_H_
@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdbool.h>
 
 
-/** @brief Error codes
+/** \brief Error codes
  */
 typedef enum t64_error_code_t {
     T64_ERR_NONE,           /**< no error */
@@ -41,18 +41,17 @@ typedef enum t64_error_code_t {
 } T64ErrorCode;
 
 
-/** @brief  Minimum valid error code
+/** \brief  Minimum valid error code
  */
 #define T64_ERRNO_MIN   0
 
-
-/** @brief  Maximum valid error code
+/** \brief  Maximum valid error code
  */
 #define T64_ERRNO_MAX   T64_ERR_INDEX
 
 
+extern int      t64_errno;
 
-extern int t64_errno;
 
 int             base_err_alloc(size_t n);
 
@@ -72,8 +71,8 @@ const char *    t64_strerror(int code);
 
 
 void *          base_malloc(size_t n);
-void            base_free(void *p);
 void *          base_realloc(void *p, size_t n);
+void            base_free(void *p);
 
 const char *    base_basename(const char *path, const char **ext);
 

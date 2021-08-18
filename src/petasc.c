@@ -30,8 +30,6 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.*
  */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -42,7 +40,6 @@
 #include "cbmdos.h"
 
 #include "petasc.h"
-
 
 
 /** \brief  PETSCII to ASCII translation table
@@ -158,7 +155,9 @@ static const uint8_t asc_to_pet_table[256] = {
 
 
 
-/** @brief  Illegal characters in file names and paths
+/** \brief  Illegal characters in file names and paths
+ *
+ * A string containing characters that are illegal in a host path.
  *
  * In UNIX(-like) systems, just about everything is allowed with escaping,
  * except the forward slash, in Windows systems there's quite a few disallowed
@@ -170,8 +169,6 @@ static const char *host_illegal_chars =
 #else
     "/\\?%*:|\"<>";
 #endif
-
-
 
 
 /** \brief  Translate PETSCII code \a pet to ASCII
@@ -197,7 +194,7 @@ uint8_t pet_to_asc(uint8_t pet)
  *
  * \param[in]   asc     ASCII code
  *
- * @return  PETSCII code
+ * \return  PETSCII code
  */
 uint8_t asc_to_pet(uint8_t asc)
 {

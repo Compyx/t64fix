@@ -17,8 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/** @file   main.c
- * @brief   t64fix driver
+/** \file   main.c
+ * \brief   t64fix driver
  */
 
 
@@ -33,38 +33,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "t64.h"
 
 
-/** @brief  Quiet mode flag
+/** \brief  Quiet mode flag
  *
- * If set, no output is sent to stdout/stderr, but the tool returns either
- * EXIT_SUCCESS or EXIT_FAILURE. Useful for scripts.
+ * If set, no output is sent to stdout, error message are still sent to stderr.
+ *
+ *
  */
 static bool quiet = 0;
-
 
 /** \brief  Path to fixed file with =o
  */
 static const char *outfile = NULL;
 
-/** @brief  Extract program file
+/** \brief  Extract program file
  *
  * This variable is the index of the program file to extract
  */
 static long extract = -1;
 
-
-/** @brief  Extract all files
+/** \brief  Extract all files
  */
 static bool extract_all = 0;
-
 
 /** \brief  T64 archive to create
  */
 static const char *create_file = NULL;
 
 
-/** @brief  Command line options
+/** \brief  Command line options
  */
-option_decl_t options[] = {
+static const option_decl_t options[] = {
     { 'q', "quiet", &quiet, OPT_BOOL,
         "don't output to stdout/stderr" },
     { 'e', "extract", &extract, OPT_INT,
@@ -96,7 +94,7 @@ static void help_prologue(void)
 }
 
 
-/** @brief  Print error message on stderr
+/** \brief  Print error message on stderr
  *
  * If an error of T64_ERR_IO occured, the C library's errno and strerror() is
  * printed as well.
@@ -112,21 +110,21 @@ static void print_error(void)
 }
 
 
-/** @brief  Driver
+/** \brief  Program driver
  *
- * @param   argc    argument count
- * @param   argv    argument vector
+ * \param[in]   argc    argument count
+ * \param[in]   argv    argument vector
  *
- * @todo:   Probably split handling of various options/commands into subroutines
+ * \todo    Probably split handling of various options/commands into subroutines
  *
- * @return  EXIT_SUCCESS or EXIT_FAILURE
+ * \return  EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char *argv[])
 {
     t64_image_t *image;
-    int result;
     const char **args;
     const char *infile;
+    int result;
 
     if (!optparse_init(options, "t64fix", "0.4.0")) {
         return EXIT_FAILURE;
@@ -190,6 +188,7 @@ int main(int argc, char *argv[])
         return EXIT_SUCCESS;
     }
 
+    /* no --create switch given, verify given image */
     image = t64_open(infile, quiet);
     if (image == NULL) {
         if (!quiet) {

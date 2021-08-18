@@ -18,9 +18,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /** @file   t64.h
- * @brief   Header for t64.c
+ * \brief   Header for t64.c
+ *
+ * Contains prototypes of t64 handling functions and public types and defines.
+ *
+ * \todo    Move the types and defines into a separate header file.
  */
-
 
 #ifndef HAVE_T64_H
 #define HAVE_T64_H
@@ -57,7 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define T64_REC_FILENAME_LEN    0x10    /**< maximum length of a filename */
 
 
-/** @brief  Enum indicating the status of a record
+/** \brief  Enum indicating the status of a record
  */
 typedef enum {
     T64_REC_OK,         /**< record is OK */
@@ -66,8 +69,7 @@ typedef enum {
 } t64_status_t;
 
 
-
-/** @brief  t64 file record type
+/** \brief  t64 file record type
  *
  * Contains information of a single file in the container
  */
@@ -85,7 +87,7 @@ typedef struct t64_record_s {
 
 
 
-/** @brief  t64 container type
+/** \brief  t64 container type
  */
 typedef struct t64_image_s {
     uint8_t         magic[T64_HDR_MAGIC_LEN];   /**< tape magic in ASCII */
