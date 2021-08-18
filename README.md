@@ -1,10 +1,12 @@
 # t64fix
 
-Version 0.4.0
+**Version 0.4.0**
 
 ## New in version 0.4.0
 
-Add `--create` command: create a T64 image and write one or more PRG files to it.
+* Add `--create` command: create a T64 image and write one or more PRG files to it.
+* Have the option parser properly report a missing argument for string arguments,
+  not just fail silently.
 
 
 ## Introduction

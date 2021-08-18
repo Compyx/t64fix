@@ -1,6 +1,14 @@
 # CHANGES
 
-A list of changes applied to the codebase, started too late as usual ;)
+## A list of changes applied to the codebase, started too late as usual ;)
+
+
+### 2021-08-18
+
+* Update Doxygen docblocks and the Doxyfile.
+* Rework optparse to use xmalloc()-style allocation.
+* Call abort() rather than exit() on allocation failures to allow debuggers to
+  get useful information to work with.
 
 
 ### 2021-08-17
