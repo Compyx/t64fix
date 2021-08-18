@@ -94,16 +94,62 @@ static size_t arglist_size;
  * Private API
  */
 
-/** \brief  Initialize argument list
+/** \brief  Print memory allocation error message and call abort(3)
  *
- * \return  bool
+ * Prints error message on stderr and then calls abort in order to allow use of
+ * a debugger.
+ *
+ * \param[in]   n   number of bytes requested that triggered the error
  */
-static int arglist_init(void)
+static void opt_err_alloc(size_t n)
 {
-    arglist = malloc(sizeof *arglist * ARGLIST_INIT);
+    fprintf(stderr, "optparse: failed to allocate %zu bytes, aborting.\n", n);
+    abort();
+}
+
+
+/** \brief  Allocate memory
+ *
+ * Allocate \a n bytes of memory on the heap, call abort() on failure.
+ *
+ * \param[in]   n   number of bytes to allocate
+ */
+static void *opt_malloc(size_t n)
+{
+    void *p = malloc(n);
+
+    if (p == NULL) {
+        opt_err_alloc(n);
+    }
+    return p;
+}
+
+
+/** \brief  Reallocate memory
+ *
+ * Rellocate \a p to \a n bytes, call abort() on failure.
+ *
+ * \param[in]   p   block of memory to resize
+ * \param[in]   n   new size
+ */
+static void *opt_realloc(void *p, size_t n)
+{
+    void *t = realloc(p, n);
+
+    if (t == NULL) {
+        opt_err_alloc(n);
+    }
+    return t;
+}
+
+
+/** \brief  Initialize argument list
+ */
+static void arglist_init(void)
+{
+    arglist = opt_malloc(sizeof *arglist * ARGLIST_INIT);
     arglist_size = ARGLIST_INIT;
     arglist_used = 0;
-    return arglist != NULL ? 1 : 0;
 }
 
 
@@ -118,22 +164,15 @@ static void arglist_free(void)
 /** \brief  Add argument to argument list
  *
  * \param[in]   arg argument (element from argv)
- *
- * \return  1 on success 0 on failure
  */
-static int arglist_add_arg(const char *arg)
+static void arglist_add_arg(const char *arg)
 {
     if (arglist_used == arglist_size - 1) {
         /* resize arglist */
-        const char **tmp = realloc(arglist, sizeof *tmp * arglist_size * 2);
-        if (tmp == NULL) {
-            return 0;
-        }
-        arglist = tmp;
         arglist_size *= 2;
+        arglist = opt_realloc(arglist, sizeof *arglist * arglist_size);
     }
     arglist[arglist_used++] = arg;
-    return 1;
 }
 
 
@@ -294,11 +333,10 @@ static void optparse_version(void)
  *
  * \return  bool
  */
-int optparse_init(const option_decl_t *option_list,
-                  const char *name,
-                  const char *version)
+void optparse_init(const option_decl_t *option_list,
+                   const char *name,
+                   const char *version)
 {
-    int result;
     options = option_list;
     prg_name = name;
     prg_version = version;
@@ -306,15 +344,7 @@ int optparse_init(const option_decl_t *option_list,
 #ifdef OPTPARSE_DEBUG
     printf("%s:%d: initializing argument list .. ", __FILE__, __LINE__);
 #endif
-    result = arglist_init();
-#ifdef OPTPARSE_DEBUG
-    if (result) {
-        printf("OK\n");
-    } else {
-        printf("failed\n");
-    }
-#endif
-    return result;
+    arglist_init();
 }
 
 
@@ -359,9 +389,7 @@ int optparse_exec(int argc, char *argv[])
 #ifdef OPTPARSE_DEBUG
             printf("%s:%d: found argument: '%s'\n", __FILE__, __LINE__, arg);
 #endif
-            if (!arglist_add_arg(arg)) {
-                return OPT_EXIT_ERROR;
-            }
+            arglist_add_arg(arg);
         } else {
             const option_decl_t *opt;
 #ifdef OPTPARSE_DEBUG
@@ -428,7 +456,7 @@ const char **optparse_args(void)
  *
  * Set the function to print text between the usage message and the options list.
  *
- * \param[in]   func    function to call during `--help` handlin
+ * \param[in]   func    function to call during `--help` handling
  */
 void optparse_set_prologue(void (*func)(void))
 {

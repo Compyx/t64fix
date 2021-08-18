@@ -33,6 +33,7 @@ enum {
     OPT_EXIT_VERSION = -3       /**< --version encountered and handled */
 };
 
+
 /** \brief  Option type enum
  */
 typedef enum {
@@ -42,13 +43,12 @@ typedef enum {
 } option_type_t;
 
 
-/** \brief  Error coce for the parser
+/** \brief  Error codes for the parser
  */
 enum {
     OPT_ERR_MISSING_ARG,    /**< option requires argument, but none was given */
     OPT_ERR_INVALID_ARG     /**< the argument for the option is invalid */
 };
-
 
 
 /** \brief  Option declaration type
@@ -62,7 +62,7 @@ typedef struct option_decl_s {
 } option_decl_t;
 
 
-int             optparse_init(const option_decl_t *option_list,
+void            optparse_init(const option_decl_t *option_list,
                               const char *name,
                               const char *version);
 int             optparse_exec(int argc, char *argv[]);
