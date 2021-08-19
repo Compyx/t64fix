@@ -570,6 +570,90 @@ bool t64_write(t64_image_t *image, const char *path)
 }
 
 
+/** \brief  Write PRG file into T64 image
+ *
+ * Write PRG file \a path into \a image and store its directory entry.
+ *
+ * \param[in]   image   t64 image
+ * \param[in]   path    path to PRG file
+ * \param[in]   index   index in directory of \a image
+ * \param[in]   quiet   don't print anything on stdout
+ *
+ * \return  true if succesfully written
+ */
+static bool store_prg_file(t64_image_t *image,
+                           const char *path,
+                           int index,
+                           bool quiet)
+{
+    t64_record_t record;
+    uint8_t *data;
+    uint8_t petname[CBMDOS_FILENAME_MAX];
+    const char *ascname;
+    const char *ext;
+    long len;
+
+    len = fread_alloc(&data, path);
+    if (!quiet) {
+        printf(".. file '%s' is %ld ($%04lx) bytes.\n",
+               path, len, (unsigned long)len);
+    }
+    if (len < 0) {
+        fprintf(stderr, "t64fix: failed to read file '%s'.\n", path);
+        base_free(data);
+        return false;
+    }
+
+    /* create directory record from file data */
+    memset(&record, 0, sizeof(record));
+
+    /*
+     * set PETSCII filename using the file's ASCII basename
+     */
+    ascname = base_basename(path, &ext);
+    asc_to_pet_str(petname, ascname, CBMDOS_FILENAME_MAX);
+    /* pad filename with spaces */
+    for (int i = CBMDOS_FILENAME_MAX - 1; i >=0; i--) {
+        if (petname[i] == 0x00) {
+            petname[i] = 0x20;
+        }
+    }
+    memcpy(record.filename, petname, CBMDOS_FILENAME_MAX);
+
+    /* set start, end and real_end */
+    record.start_addr = get_uint16(data);
+    record.end_addr = (uint16_t)(len - 2 + record.start_addr);
+    record.real_end_addr = record.end_addr;
+    if (!quiet) {
+        printf(".... start address = $%04x\n", record.start_addr);
+        printf(".... end address   = $%04x\n", record.end_addr);
+    }
+
+    /* set C64S file type */
+    record.c64s_ftype = 0x01;   /* normal file */
+    /* set CBMDOS file type and flags */
+    record.c1541_ftype = CBMDOS_FILETYPE_PRG | CBMDOS_CLOSED_MASK;
+
+    /* realloc data after header + dir */
+    image->data = base_realloc(image->data, image->size + (size_t)len - 2);
+    /* copy file data stripped of load address */
+    memcpy(image->data + image->size, data + 2, (size_t)(len - 2));
+    /* store data size */
+    record.offset = (uint32_t)image->size;
+    image->size += (size_t)len - 2;
+    /* free file data */
+    base_free(data);
+
+    /* store directory entry in t64 image instance, not its raw data */
+    memcpy(image->records + index, &record, sizeof(record));
+
+    if (!quiet) {
+        printf(".... added '%s'\n", ascname);
+    }
+    return true;
+}
+
+
 /** \brief  Create T64 image and add files
  *
  * \param[in]   path    name of T64 image to create
@@ -589,8 +673,9 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
     const char *img_name;
     const char *img_ext;
     size_t img_name_len;
-    int n;
+    int index;
 
+    /* create empty image */
     if (!quiet) {
         printf("Creating new t64 image '%s':\n", path);
     }
@@ -616,78 +701,16 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
     memset(image->data, 0, data_offset);
 
     /* add files to image */
-    for (n = 0; n < nargs; n++) {
-
-        t64_record_t record;
-        uint8_t *data;
-        uint8_t petname[CBMDOS_FILENAME_MAX];
-        const char *ascname;
-        const char *ext;
-        long len;
-
-        len = fread_alloc(&data, args[n]);
-        if (!quiet) {
-            printf(".. file '%s' is %ld ($%04lx) bytes.\n",
-                   args[n], len, (unsigned long)len);
-        }
-        if (len < 0) {
-            fprintf(stderr, "t64fix: failed to read file '%s'.\n", args[n]);
-            base_free(data);
+    for (index = 0; index < nargs; index++) {
+        if (!store_prg_file(image, args[index], index, quiet)) {
             t64_free(image);
             return NULL;
-        }
-
-        /* create directory record from file data */
-        memset(&record, 0, sizeof(record));
-
-        /*
-         * set PETSCII filename using the file's ASCII basename
-         */
-        ascname = base_basename(args[n], &ext);
-        asc_to_pet_str(petname, ascname, CBMDOS_FILENAME_MAX);
-        /* pad filename with spaces */
-        for (int i = CBMDOS_FILENAME_MAX - 1; i >=0; i--) {
-            if (petname[i] == 0x00) {
-                petname[i] = 0x20;
-            }
-        }
-        memcpy(record.filename, petname, CBMDOS_FILENAME_MAX);
-
-        /* set start, end and real_end */
-        record.start_addr = get_uint16(data);
-        record.end_addr = (uint16_t)(len - 2 + record.start_addr);
-        record.real_end_addr = record.end_addr;
-        if (!quiet) {
-            printf(".... start address = $%04x\n", record.start_addr);
-            printf(".... end address   = $%04x\n", record.end_addr);
-        }
-
-        /* set C64S file type */
-        record.c64s_ftype = 0x01;   /* normal file */
-        /* set CBMDOS file type and flags */
-        record.c1541_ftype = CBMDOS_FILETYPE_PRG | CBMDOS_CLOSED_MASK;
-
-        /* realloc data after header + dir */
-        image->data = base_realloc(image->data, image->size + (size_t)len - 2);
-        /* copy file data stripped of load address */
-        memcpy(image->data + image->size, data + 2, (size_t)(len - 2));
-        /* store data size */
-        record.offset = (uint32_t)image->size;
-        image->size += (size_t)len - 2;
-        /* free file data */
-        base_free(data);
-
-        /* store directory entry in t64 image instance, not its raw data */
-        memcpy(image->records + n, &record, sizeof(record));
-
-        if (!quiet) {
-            printf(".... added '%s'\n", ascname);
         }
     }
 
     /* set directory size and entry count */
-    image->rec_used = (uint16_t)n;
-    image->rec_max = (uint16_t)n ;
+    image->rec_used = (uint16_t)index;
+    image->rec_max = (uint16_t)index;
 
     /* set internal image name using the basename of the t64 file without
      * extension:
@@ -728,10 +751,11 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         memcpy(image->tapename, tapename_pet, img_name_len);
     }
 
+    /* report success */
     if (!quiet) {
         printf(".. created new image with %d entries, "
                "%zu ($%zx) bytes.\n",
-               n, image->size, image->size);
+               index, image->size, image->size);
     }
 
     return image;
