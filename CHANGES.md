@@ -8,6 +8,9 @@
 * Properly translate generated tapename to PETSCII.
 * Add base\_debug() macro.
 * Pad filenames in directory with spaces ($20), not $00.
+* Properly convert filenames from/to PETSCII.
+* Remove filename padding when printing records to stdout
+* Translate tapename from PETSCII when printing to stdout
 
 
 ### 2021-08-18

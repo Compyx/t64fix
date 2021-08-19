@@ -280,14 +280,31 @@ static void t64_print_record(const t64_image_t *image, int index)
 {
     t64_record_t *record = image->records + index;
     int size = record->end_addr - record->start_addr;
-    char filename[T64_REC_FILENAME_LEN + 1];
+    char filename_asc[T64_REC_FILENAME_LEN + 1];
+    int n;
 
-    memcpy(filename, record->filename, T64_REC_FILENAME_LEN);
-    filename[T64_REC_FILENAME_LEN] = '\0';
+    /* copy and translate PETSCII filename */
+    filename_asc[T64_REC_FILENAME_LEN] = '\0';
+    pet_to_asc_str(filename_asc, record->filename, T64_REC_FILENAME_LEN);
+    /* strip padding */
+    n = T64_REC_FILENAME_LEN - 1;
+    while (n >= 0) {
+        if (filename_asc[n] == 0x20) {
+            filename_asc[n] = '\0';
+        }
+        n--;
+    }
 
-    printf("%5d  \"%-16s\" %s  $%04x-$%04x  $%04x-$%04x  %s\n",
-            num_blocks((unsigned int)size),
-            filename,
+    /* print blocks and name */
+    n = printf("%5d  \"%s\"",
+                num_blocks((unsigned int)size),
+                filename_asc);
+    /* align filetype column */
+    while (n < 26) {
+        putchar(' ');
+        n++;
+    }
+    printf("%s  $%04x-$%04x  $%04x-$%04x  %s\n",
             c1541_types[record->c1541_ftype & 0x07],
             record->start_addr, record->end_addr,
             record->start_addr, record->real_end_addr,
@@ -496,17 +513,17 @@ static void print_sep(void)
  */
 void t64_dump(const t64_image_t *image)
 {
-    char tapename[T64_HDR_NAME_LEN + 1];
+    char tapename_asc[T64_HDR_NAME_LEN + 1];
     char magic[T64_HDR_MAGIC_LEN + 1];
     int i;
 
-    /* copy tapename, TODO: translate PETSCII to ASCII */
-    memcpy(tapename, image->tapename, T64_HDR_NAME_LEN);
-    tapename[T64_HDR_NAME_LEN] = '\0';  /* terminated name */
+    /* copy tapename, translate PETSCII to ASCII */
+    tapename_asc[T64_HDR_NAME_LEN] = '\0';  /* terminated name */
+    pet_to_asc_str(tapename_asc, image->tapename, T64_HDR_NAME_LEN);
     /* remove padding */
     i = T64_HDR_NAME_LEN - 1;
-    while (i >= 0 && tapename[i] == 0x20) {
-        tapename[i--] = '\0';
+    while (i >= 0 && tapename_asc[i] == 0x20) {
+        tapename_asc[i--] = '\0';
     }
 
     /* copy magic */
@@ -521,7 +538,7 @@ void t64_dump(const t64_image_t *image)
     print_sep();
     printf("tape magic  : \"%s\"\n", magic);
     printf("tape version: %04x\n", image->version);
-    printf("tape name   : \"%s\"\n", tapename);
+    printf("tape name   : \"%s\"\n", tapename_asc);
     printf("file records: %d/%d\n", (int)(image->rec_used),
             (int)(image->rec_max));
     print_sep();
