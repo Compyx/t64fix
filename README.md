@@ -103,9 +103,16 @@ decided to leave that to a library I'm writing. Better to write it once properly
 than multiple times half-assed.
 
 
-### Bugs/TODO
+### TODO
 
 - Set a name for the image created by the `--create` command, either by using
   the image's basename as a source or as an optional argument to the command.
   (Currently the image's basename excluding extension is used)
+
+### BUGS
+
+- Tapename created needs to be converted to PETSCII.
+- Filenames need to be padded with spaces ($20).
+
+
 

@@ -3,6 +3,13 @@
 ## A list of changes applied to the codebase, started too late as usual ;)
 
 
+### 2021-08-19
+
+* Properly translate generated tapename to PETSCII.
+* Add base\_debug() macro.
+* Pad filenames in directory with spaces ($20), not $00.
+
+
 ### 2021-08-18
 
 * Update Doxygen docblocks and the Doxyfile.

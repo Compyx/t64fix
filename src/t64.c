@@ -300,9 +300,7 @@ static void t64_print_record(const t64_image_t *image, int index)
 
 /** \brief  Allocate new, empty, t64 image
  *
- * @internal
- *
- * \return  new t64 image or NULL on failure
+ * \return  new t64 image
  */
 static t64_image_t *t64_new(void)
 {
@@ -332,10 +330,8 @@ t64_image_t *t64_open(const char *path, int quiet)
     int i;
 
     image = t64_new();
-    if (image == NULL) {
-        return NULL;
-    }
     image->path = path;
+
     size = fread_alloc(&(image->data), path);
     if (size < 0) {
         /* error already reported by fread_alloc() */
@@ -513,7 +509,6 @@ void t64_dump(const t64_image_t *image)
         tapename[i--] = '\0';
     }
 
-
     /* copy magic */
     memcpy(magic, image->magic, T64_HDR_MAGIC_LEN);
     magic[T64_HDR_MAGIC_LEN] = '\0';    /* terminate magic */
@@ -583,6 +578,8 @@ bool t64_write(t64_image_t *image, const char *path)
  * \param[in]   quiet   don't output anything on stdout
  *
  * \return  new T64 image instance or `NULL` on error
+ *
+ * \todo    Move handling of each PRG file to another function.
  */
 t64_image_t *t64_create(const char *path, const char **args, int nargs, bool quiet)
 {
@@ -598,9 +595,6 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         printf("Creating new t64 image '%s':\n", path);
     }
     image = t64_new();
-    if (image == NULL) {
-        return NULL;    /* error already reported */
-    }
 
     /* calculate directory size */
     dir_size = (unsigned int)nargs * T64_RECORD_SIZE;
@@ -646,12 +640,17 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
         /* create directory record from file data */
         memset(&record, 0, sizeof(record));
 
-        /* set PETSCII filename using the file's ASCII basename */
+        /*
+         * set PETSCII filename using the file's ASCII basename
+         */
         ascname = base_basename(args[n], &ext);
-#if 0
-        printf(".. basename = '%s', ext = '%s'\n", ascname, ext);
-#endif
         asc_to_pet_str(petname, ascname, CBMDOS_FILENAME_MAX);
+        /* pad filename with spaces */
+        for (int i = CBMDOS_FILENAME_MAX - 1; i >=0; i--) {
+            if (petname[i] == 0x00) {
+                petname[i] = 0x20;
+            }
+        }
         memcpy(record.filename, petname, CBMDOS_FILENAME_MAX);
 
         /* set start, end and real_end */
@@ -699,24 +698,25 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
      * writing spaces:
      */
     memset(image->tapename, 0x20, T64_HDR_NAME_LEN);
-#if 0
-    printf("basename: '%s', extension: '%s'\n", img_name, img_ext);
-#endif
+    base_debug("basename: '%s', extension: '%s'\n", img_name, img_ext);
     if (*img_ext == '\0') {
         /* no extension */
         img_name_len = strlen(img_name);
     } else {
         img_name_len = strlen(img_name) - strlen(img_ext) - 1;
     }
-#if 0
-    printf("name len without ext = %zu\n", img_name_len);
-#endif
+    base_debug("name len without ext = %zu\n", img_name_len);
+
     if (img_name_len > 0) {
+        uint8_t tapename_pet[T64_HDR_NAME_LEN];
+
         /* copy at most 24 chars */
         if (img_name_len > T64_HDR_NAME_LEN) {
             img_name_len = T64_HDR_NAME_LEN;
         }
-        memcpy(image->tapename, img_name, img_name_len);
+        /* translate to petscii */
+        asc_to_pet_str(tapename_pet, img_name, T64_HDR_NAME_LEN);
+
         if (!quiet) {
             char tapename[T64_HDR_NAME_LEN + 1];
 
@@ -724,6 +724,8 @@ t64_image_t *t64_create(const char *path, const char **args, int nargs, bool qui
             memcpy(tapename, img_name, img_name_len);
             printf(".. setting tape name to '%s'.\n", tapename);
         }
+        /* copy PETSCII tapename into image */
+        memcpy(image->tapename, tapename_pet, img_name_len);
     }
 
     if (!quiet) {

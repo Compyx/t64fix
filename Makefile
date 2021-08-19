@@ -6,6 +6,9 @@ LD=gcc
 INSTALL_PREFIX=/usr/local
 
 # These flags are know to work with GCC >= 8.3.0
+#
+# Add -DDEBUG to enable debugging messages
+#
 CFLAGS=-W -Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
 	-Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes \
 	-Wswitch-default -Wswitch-enum -Wuninitialized -Wconversion \

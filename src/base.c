@@ -123,7 +123,6 @@ void set_uint16(uint8_t *p, uint16_t v)
 }
 
 
-
 /** \brief  Read unsigned 32-bit little endian value
  *
  * \param[in]   p   data containing the value

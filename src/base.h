@@ -25,6 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef BASE_H_
 #define BASE_H_
 
+#ifdef DEBUG
+# include <stdio.h>
+# include <stdarg.h>
+#endif
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -48,6 +52,22 @@ typedef enum t64_error_code_t {
 /** \brief  Maximum valid error code
  */
 #define T64_ERRNO_MAX   T64_ERR_INDEX
+
+
+/** \def    base_debug
+ *\brief    Print debug message
+ *
+ * Print debug message on stdout if DEBUG is defined.
+ */
+#ifdef DEBUG
+# define base_debug(...) \
+    printf("[debug] %s:%d::%s(): ", __FILE__, __LINE__, __func__); \
+    printf(__VA_ARGS__); \
+    putchar('\n');
+#else
+# define base_debug(...)
+#endif
+
 
 
 extern int      t64_errno;
