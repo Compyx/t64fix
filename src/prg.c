@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <ctype.h>
 
 #include "base.h"
-#include "t64.h"
+#include "t64types.h"
 
 #include "prg.h"
 

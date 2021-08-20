@@ -3,6 +3,12 @@
 ## A list of changes applied to the codebase, started too late as usual ;)
 
 
+### 2021-08-20
+
+* Split t64.h into t64types.h and t64.h, with t64types.h containing the globally
+  used defines and types.
+
+
 ### 2021-08-19
 
 * Properly translate generated tapename to PETSCII.

@@ -28,8 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <errno.h>
 #include <stdbool.h>
 
+#include "base.h"
 #include "optparse.h"
 #include "prg.h"
+#include "t64types.h"
 #include "t64.h"
 
 

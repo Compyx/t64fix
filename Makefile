@@ -28,10 +28,10 @@ all: $(TARGET)
 # dependencies of objects
 base.o:
 cbmdos.o:
-main.o: optparse.o prg.o t64.o
+main.o: base.o optparse.o prg.o t64.o t64types.h
 optparse.o:
 petasc.o:
-prg.o: base.o t64.h
+prg.o: base.o t64types.h
 t64.o: base.o cbmdos.o petasc.o
 
 

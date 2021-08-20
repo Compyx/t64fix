@@ -105,5 +105,7 @@ than multiple times half-assed.
 
 ### TODO
 
+- Proper PETSCII to ASCII conversion in prg\_extract()
+
 
 ### BUGS
