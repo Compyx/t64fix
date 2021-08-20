@@ -31,7 +31,7 @@ cbmdos.o:
 main.o: base.o optparse.o prg.o t64.o t64types.h
 optparse.o:
 petasc.o:
-prg.o: base.o t64types.h
+prg.o: base.o petasc.o t64types.h
 t64.o: base.o cbmdos.o petasc.o
 
 

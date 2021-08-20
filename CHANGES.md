@@ -7,6 +7,7 @@
 
 * Split t64.h into t64types.h and t64.h, with t64types.h containing the globally
   used defines and types.
+* Properly convert PETSCII filename to ASCII in prg\_extract().
 
 
 ### 2021-08-19

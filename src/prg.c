@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <ctype.h>
 
 #include "base.h"
+#include "petasc.h"
 #include "t64types.h"
 
 #include "prg.h"
@@ -43,8 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * \param[in]   image   t64 image
  * \param[in]   index   index in \a image of file to extract
  * \param[in]   quiet   don't output anything to stdout/stderr
- *
- * \todo    Needs proper PETSCII to ASCII translation
  *
  * \return  bool
  */
@@ -69,10 +68,12 @@ bool prg_extract(const t64_image_t *image, int index, int quiet)
         }
         return true;
     }
-    /* translate filename */
+    /* convert filename from PETSCII, replace '/' */
+    pet_to_asc_str(name, record->filename, T64_REC_FILENAME_LEN);
     for (i = 0; i < T64_REC_FILENAME_LEN; i++) {
-        int ch = record->filename[i];
-        name[i] = isprint(ch) && ch != '/' ? (char)ch : '_';
+        if (name[i] == '/') {
+            name[i] = '_';
+        }
     }
     /* remove padding */
     i--;
