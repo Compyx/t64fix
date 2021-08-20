@@ -679,8 +679,6 @@ static bool store_prg_file(t64_image_t *image,
  * \param[in]   quiet   don't output anything on stdout
  *
  * \return  new T64 image instance or `NULL` on error
- *
- * \todo    Move handling of each PRG file to another function.
  */
 t64_image_t *t64_create(const char *path, const char **args, int nargs, bool quiet)
 {

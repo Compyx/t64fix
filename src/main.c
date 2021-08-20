@@ -267,8 +267,6 @@ static bool cmd_extract_all(const char *path)
  * \param[in]   argc    argument count
  * \param[in]   argv    argument vector
  *
- * \todo    Probably split handling of various options/commands into subroutines
- *
  * \return  EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char *argv[])

@@ -10,6 +10,7 @@
 * Properly convert PETSCII filename to ASCII in prg\_extract().
 * Move command handling into separate functions.
 * Remove implicit --output, no more `t64fix <org-file> <fixed-file>`.
+* Remove fixed TODOs.
 
 
 ### 2021-08-19
