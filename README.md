@@ -22,14 +22,15 @@ were written by people who didn't really understand the format.
 
 ## Usage
 
-Usage is relatively simple: `t64fix [options] <SOURCE> [<DESTINATION>]`
+Usage is relatively simple: `t64fix [OPTIONS] <SOURCE>`
 
 When just checking if a t64 file is correct, just issue `t64fix <SOURCE>`. This
 will verify the image and show its contents and any warnings on stdout. To fix
-an image, issue `t64fix <SOURCE> <DESTINATION>`, this will verify and fix
+an image, issue `t64fix <SOURCE> -o <DESTINATION>`, this will verify and fix
 \<SOURCE\> and write it to \<DESTINATION\>. Using the same for SOURCE and
 DESTINATION is fine, SOURCE is read into memory and then closed, so using
-`t64fix foo.t64 foo.t64` will fix foo.t64 and write it back.
+`t64fix foo.t64 -o foo.t64` will fix foo.t64 and write it back. But obviously
+the original file will be lost, so this is not advisable.
 
 
 More 'advanced' use is available through a few command line switches:
@@ -37,6 +38,7 @@ More 'advanced' use is available through a few command line switches:
 | Option                                  | Description                                         |
 | --------------------------------------- | ----------------------------------------------------|
 | -q/--quiet                              | don't output anything to stdout, for use in scripts |
+| -o/--output \<fixed-image\>             | write fixed image to filesystem
 | -e/--extract \<index\>                  | extract file \<index\> from image                   |
 | -x/--extract-all                        | extract all files, except memory snapshots          |
 | -c/--create \<image\> \<list-of-files\> | create t64 image and write on or more files to it   |

@@ -304,6 +304,7 @@ bool fwrite_prg(const char *path, const uint8_t *data, size_t size, int start)
 {
     bool result = false;
     FILE *fd = fopen(path, "wb");
+
     if (fd == NULL) {
         t64_errno = T64_ERR_IO;
         return false;

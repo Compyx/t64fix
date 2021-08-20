@@ -14,7 +14,7 @@ CFLAGS=-W -Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
 	-Wswitch-default -Wswitch-enum -Wuninitialized -Wconversion \
 	-Wredundant-decls -Wnested-externs -Wunreachable-code -Wuninitialized \
 	-Wdiscarded-qualifiers -Wsign-compare \
-	-g -O3
+	-g -O3 -DDEBUG
 
 OBJS = main.o base.o cbmdos.o optparse.o petasc.o prg.o t64.o
 HEADERS = base.h d64.h t64.h optparse.h

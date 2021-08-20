@@ -53,7 +53,6 @@ bool prg_extract(const t64_image_t *image, int index, int quiet)
     char name[T64_REC_FILENAME_LEN + 5];    /* +4 for '.prg', + 1 for 0 */
     int i;
 
-
     if (index < 0 || index >= image->rec_used) {
         t64_errno = T64_ERR_INDEX;
         return false;
@@ -84,6 +83,7 @@ bool prg_extract(const t64_image_t *image, int index, int quiet)
     if (!quiet) {
         printf("t64fix: writing prg file '%s'\n", name);
     }
+
     return fwrite_prg(name, image->data + record->offset,
             (size_t)(record->real_end_addr - record->start_addr),
             record->start_addr);

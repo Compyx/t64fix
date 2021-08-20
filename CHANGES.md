@@ -8,6 +8,8 @@
 * Split t64.h into t64types.h and t64.h, with t64types.h containing the globally
   used defines and types.
 * Properly convert PETSCII filename to ASCII in prg\_extract().
+* Move command handling into separate functions.
+* Remove implicit --output, no more `t64fix <org-file> <fixed-file>`.
 
 
 ### 2021-08-19
@@ -16,8 +18,8 @@
 * Add base\_debug() macro.
 * Pad filenames in directory with spaces ($20), not $00.
 * Properly convert filenames from/to PETSCII.
-* Remove filename padding when printing records to stdout
-* Translate tapename from PETSCII when printing to stdout
+* Remove filename padding when printing records to stdout.
+* Translate tapename from PETSCII when printing to stdout.
 
 
 ### 2021-08-18
