@@ -19,4 +19,5 @@ jobs:
       with:
         install: gcc make
     - name: make
-      run: make
+      run: gcc --version
+      run: make -j3
