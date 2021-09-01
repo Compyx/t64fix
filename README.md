@@ -37,15 +37,15 @@ the original file will be lost, so this is not advisable.
 
 More 'advanced' use is available through a few command line switches:
 
-| Option                                  | Description                                         |
-|:--------------------------------------- |:----------------------------------------------------|
-| -q/--quiet                              | don't output anything to stdout, for use in scripts |
-| -o/--output \<fixed-image\>             | write fixed image to filesystem
-| -e/--extract \<index\>                  | extract file \<index\> from image                   |
-| -x/--extract-all                        | extract all files, except memory snapshots          |
-| -c/--create \<image\> \<list-of-files\> | create t64 image and write on or more files to it   |
-| --help                                  | show help                                           |
-| --version                               | show version info                                   |
+| Option                                    | Description                                         |
+|:----------------------------------------- |:----------------------------------------------------|
+| `-q, --quiet`                             | don't output anything to stdout, for use in scripts |
+| `-o, --output <fixed-image>`              | write fixed image to filesystem                     |
+| `-e, --extract <index>`                   | extract file \<index\> from image                   |
+| `-x, --extract-all`                       | extract all files, except memory snapshots          |
+| `-c, --create <image> <list-of-files>`    | create t64 image and write on or more files to it   |
+| `--help`                                  | show help                                           |
+| `--version`                               | show version info                                   |
 
 
 The `--quiet` option tells t64fix to not output any information on stdout, it
