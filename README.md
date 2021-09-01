@@ -7,6 +7,8 @@
 * Add `--create` command: create a T64 image and write one or more PRG files to it.
 * Have the option parser properly report a missing argument for string arguments,
   not just fail silently.
+* Improve `make install`
+* Add man page.
 
 
 ## Introduction
@@ -36,7 +38,7 @@ the original file will be lost, so this is not advisable.
 More 'advanced' use is available through a few command line switches:
 
 | Option                                  | Description                                         |
-| --------------------------------------- | ----------------------------------------------------|
+|:--------------------------------------- |:----------------------------------------------------|
 | -q/--quiet                              | don't output anything to stdout, for use in scripts |
 | -o/--output \<fixed-image\>             | write fixed image to filesystem
 | -e/--extract \<index\>                  | extract file \<index\> from image                   |
@@ -95,6 +97,26 @@ is usually something like 0x01 or 0x44. This tool adjusts incorrect values to
 0x82 (PRG), since t64 files can really only store PRG files (and C64S' FRZ files)
 
 
+## Building and installing
+
+To build t64fix simply run `make`. To install run `make install` as root.
+
+Targets for `make`:
+
+| Target          | Result
+|:--------------- |:------------------------------------------------------------------------- |
+| \<none\>        | Build t64fix without debugging enabled                                    |
+| `all`           | Build t64fix without debugging enabled                                    |
+| `clean`         | Remove t64fix and all intermediate objects, delete Doxygen documentation  |
+| `debug`         | Build t64fix with debugging enabled                                       |
+| `dist`          | Generate distribution tarball (`t64fix-$(VERSION).tar.gz`)                |
+| `doc`           | Generate Doxygen documentation (in `doc/html`)                            |
+| `install`       | Install t64fix executable and its man page                                |
+| `install-bin`   | Install t64fix executable                                                 |
+| `install-man`   | Install t64fix man page                                                   |
+
+
+
 ## Future
 
 I probably won't be adding any more features to this tool, unless specifically
@@ -109,3 +131,6 @@ than multiple times half-assed.
 
 
 ### BUGS
+
+
+

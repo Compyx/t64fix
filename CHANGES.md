@@ -2,6 +2,13 @@
 
 ## A list of changes applied to the codebase, started too late as usual ;)
 
+### 2021-09-01
+
+* Add `debug` rule to Makefile, passes -DDEBUG via CPPFLAGS.
+* Implement proper `install` rule in Makefile.
+* Add `dist` rule to Makefile, creates a tarball of the sources. Excludes the reference documentation and the test files (t64, prg etc).
+* Add man page.
+
 
 ### 2021-08-20
 

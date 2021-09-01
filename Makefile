@@ -22,8 +22,7 @@ CFLAGS=-W -Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
 	-Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes \
 	-Wswitch-default -Wswitch-enum -Wuninitialized -Wconversion \
 	-Wredundant-decls -Wnested-externs -Wunreachable-code -Wuninitialized \
-	-Wdiscarded-qualifiers -Wsign-compare -DVERSION=\"$(VERSION)\" \
-	-g -O3 -DDEBUG
+	-Wdiscarded-qualifiers -Wsign-compare -DVERSION=\"$(VERSION)\" -g -O3
 
 
 # Object files
@@ -74,6 +73,10 @@ prg.o: base.o petasc.o t64types.h
 t64.o: base.o cbmdos.o petasc.o
 
 
+debug: CPPFLAGS=-DDEBUG
+debug: $(TARGET)
+
+
 .PHONY: doc
 doc:
 	doxygen 1>/dev/null
@@ -111,7 +114,7 @@ dist:
 
 # generic rule to build objects from source files
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 $(TARGET): $(OBJS)
 	$(LD) -o $(TARGET) $(OBJS)
