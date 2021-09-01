@@ -1,4 +1,1 @@
-# Ignore all
-*
-# but not this
-!.gitignore
+html

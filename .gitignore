@@ -7,4 +7,5 @@
 *.swp
 *~
 *.exe
+/t64fix*.tar.gz
 

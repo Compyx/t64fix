@@ -1,0 +1,55 @@
+.\" Manpage for t64fix
+.TH t64fix 1 "01 September 2021" "0.4.0" "t64fix Manual"
+.SH NAME
+t64fix \[en] verify, fix and create T64 archives
+.SH SYNOPSIS
+.PP
+\f[B]t64fix\f[R] [\f[I]OPTION\f[R]]... \f[I]ARCHIVE\f[R]
+.br
+\f[B]t64fix\f[R] [\f[I]OPTION\f[R]]... \f[I]ARCHIVE\f[R] \-o \f[I]FIXED-ARCHIVE\f[R]
+.br
+\f[B]t64fix\f[R] [\f[I]OPTION\f[R]]... \-c \f[I]ARCHIVE\f[R] \f[I]PRG-FILE\f[R]...
+.br
+\f[B]t64fix\f[R] [\f[I]OPTION\f[R]]... \-e \f[I]INDEX\f[R] \f[I]ARCHIVE\f[R]
+.br
+\f[B]t64fix\f[R] [\f[I]OPTION\f[R]]... \-x \f[I]ARCHIVE\f[R]
+.\" Additional description
+.SH DESCRIPTION
+.PP
+Verify ARCHIVE and optionally write version to FIXED-ARCHIVE, or create a new ARCHIVE with one or more PRG_FILE(s).
+.TP
+\f[B]\-c\f[R], \f[B]\-\-create \f[I]ARCHIVE\f[R] \f[I]PRG-FILE\f[R]...
+create ARCHIVE and copy PRG-FILE(s) to it
+.TP
+\f[B]\-e\f[R], \f[B]\-\-extract \f[I]INDEX\f[R] \f[I]ARCHIVE\f[R]
+extract file from ARCHIVE at INDEX. Indexes start at 0
+.TP
+\f[B]\-o\f[R], \f[B]\-\-output \f[I]FIXED-ARCHIVE\f[R]
+write fixed image as FIXED-ARCHIVE. Valid for verify (the default mode)
+.TP
+\f[B]\-q\f[R], \f[B]\-\-quiet
+be quiet, don't output anything on stdout. The exit status of the program can be checked for the result of an operation. Operational errors, such as I/O errors will still be reported on stderr
+\f[B]\-x\f[R], \f[B]\-\-extract-all \f[I]ARCHIVE\f[R]
+extract all files from ARCHIVE. Extracted files are written using their PETSCII filename converted to ASCII plus an extension of '.prg'
+.TP
+\f[B]\-h\f[R], \f[B]\-\-help
+display help and exit
+.TP
+\f[B]\-v\f[R], \f[B]\-\-version
+display program version and exit
+.PP
+When verifying an archive, the program doesn't alter its input in any way, so it can also be used to just display the directory of an archive.
+.SH AUTHOR
+Written by Bas Wassink.
+.SH "REPORTING BUGS"
+Report bugs at <https://github.com/Compyx/t64fix/issues/>
+.br
+The issues tracker can also be used to request new features.
+.SH COPYRIGHT
+Copyright \(co 2021 Bas Wassink.
+License GPLv2+: GNU GPL version 2 or later <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+Full documentation and source at <https://github.com/Compyx/t64fix/>

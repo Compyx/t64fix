@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
     int result;     /* optparse result */
     bool status;    /* command status */
 
-    optparse_init(options, "t64fix", "0.4.0");
+    optparse_init(options, "t64fix", VERSION);
     optparse_set_prologue(help_prologue);
 
     if (argc < 2) {
