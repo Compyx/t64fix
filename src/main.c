@@ -37,9 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /** \brief  Quiet mode flag
  *
- * If set, no output is sent to stdout, error message are still sent to stderr.
- *
- *
+ * If set, no output is sent to stdout, error messages are still sent to stderr.
  */
 static bool quiet = 0;
 
@@ -66,7 +64,7 @@ static const char *create_file = NULL;
  */
 static const option_decl_t options[] = {
     { 'q', "quiet", &quiet, OPT_BOOL,
-        "don't output to stdout/stderr" },
+        "don't output to anything on stdout" },
     { 'e', "extract", &extract, OPT_INT,
         "extract program file" },
     { 'o', "output", &outfile, OPT_STR,
