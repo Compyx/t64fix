@@ -1,14 +1,12 @@
-# t64fix
-
-**Version 0.4.0**
+# t64fix v0.4.0
 
 ## New in version 0.4.0
 
-* Add `--create` command: create a T64 image and write one or more PRG files to it.
-* Have the option parser properly report a missing argument for string arguments,
+- Add `--create` command: create a T64 image and write one or more PRG files to it.
+- Have the option parser properly report a missing argument for string arguments,
   not just fail silently.
-* Improve `make install`
-* Add man page.
+- Improve `make install`
+- Add man page.
 
 
 ## Introduction
@@ -122,15 +120,19 @@ Targets for `make`:
 I probably won't be adding any more features to this tool, unless specifically
 asked for them. Any bugs found I will fix, and of course accept patches for
 them.
-Adding support for exporting to d64 is something I thought about and have
-decided to leave that to a library I'm writing. Better to write it once properly
-than multiple times half-assed.
-
 
 ### TODO
+
+- d64 support
 
 
 ### BUGS
 
+none(?)
 
 
+## Resources
+
+[t64fix GitHub project page](https://github.com/Compyx/t64fix/)
+[t64fix website](https://compyx.github.io/t64fix/)
+[T64 file format description](http://unusedino.de/ec64/technical/formats/t64.html)
