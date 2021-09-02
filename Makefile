@@ -70,7 +70,7 @@ ifeq ($(MSYSTEM_CARCH),x86_64)
 	WINDIST_DIR := t64fix-win64-$(VERSION)
 endif
 ifeq ($(MSYSTEM_CARCH),i686)
-	WINDIST_DIR= := t64fix-win32-$(VERSION)
+	WINDIST_DIR := t64fix-win32-$(VERSION)
 endif
 WINDIST_ZIP := $(WINDIST_DIR).zip
 
