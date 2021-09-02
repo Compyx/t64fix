@@ -128,7 +128,7 @@ install: install-bin install-man
 
 
 # Create source distribution tarball
-dist: $(TARGET) $(DIST_FILES)
+dist: $(DIST_FILES)
 	if [ -d $(DIST_DIR) ]; \
 	    then rm -rd $(DIST_DIR); \
 	fi
