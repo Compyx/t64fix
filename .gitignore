@@ -1,4 +1,5 @@
 /t64fix
+/t64fix.exe
 /*.d64
 /*.prg
 /*.t64
@@ -6,6 +7,10 @@
 *.o
 *.swp
 *~
-*.exe
+# Source distribution
 /t64fix*.tar.gz
+# Windows distributions
+/t64fix-win32-*
+/t64fix-win64-*
+
 
