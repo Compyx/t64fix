@@ -112,6 +112,7 @@ Targets for `make`:
 | `install`       | Install t64fix executable and its man page                                |
 | `install-bin`   | Install t64fix executable                                                 |
 | `install-man`   | Install t64fix man page                                                   |
+| `windist`       | Generate Windows distribution zipfile (`t64fix-win[32|64]-$(VERSION).zip` |
 
 
 
@@ -133,6 +134,6 @@ none(?)
 
 ## Resources
 
-[t64fix GitHub project page](https://github.com/Compyx/t64fix/)
-[t64fix website](https://compyx.github.io/t64fix/)
-[T64 file format description](http://unusedino.de/ec64/technical/formats/t64.html)
+- [t64fix GitHub project page](https://github.com/Compyx/t64fix/)
+- [t64fix website](https://compyx.github.io/t64fix/)
+- [T64 file format description](http://unusedino.de/ec64/technical/formats/t64.html)
