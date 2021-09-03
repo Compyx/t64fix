@@ -1,7 +1,9 @@
 # vim: set noet ts=8 sw=8 sts=8:
+
 VPATH=src
 CC=gcc
 LD=$(CC)
+
 
 # Program (Msys2 automagically adds .exe)
 TARGET=t64fix
@@ -10,24 +12,29 @@ VERSION=0.4.0-rc1
 
 # Installation prefix for `make install`
 PREFIX ?= /usr/local
-
+# Installation path for the man page
 MAN_PATH = $(PREFIX)/share/man/man1
 
 
-# These flags are know to work with GCC >= 8.3.0
-#
-# Add -DDEBUG to enable debugging messages
-#
+# Check for GCC
+ifneq (,$(findstring gcc,$(CC)))
+	warn_qualifiers := -Wdiscarded-qualifiers
+endif
+# Check for clang
+ifneq (,$(findstring clang,$(CC)))
+	warn_qualifiers := -Wignored-qualifiers
+endif
+
+# These flags are know to work with GCC >= 8.3.0 and clang-14
 CFLAGS=-W -Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
 	-Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes \
 	-Wswitch-default -Wswitch-enum -Wuninitialized -Wconversion \
 	-Wredundant-decls -Wnested-externs -Wunreachable-code -Wuninitialized \
-	-Wdiscarded-qualifiers -Wsign-compare -DVERSION=\"$(VERSION)\" -g -O3
+	$(warn_qualifiers) -Wsign-compare -DVERSION=\"$(VERSION)\" -g -O3
 
 
 # Object files
 OBJS = main.o base.o cbmdos.o optparse.o petasc.o prg.o t64.o
-
 
 
 # Files for `make dist`
@@ -54,6 +61,7 @@ DIST_FILES = \
 	src/t64.h \
 	src/t64types.h \
 
+# Files for `make windist` (excluding the executable)
 WINDIST_FILES = \
 	CHANGES.md \
 	COPYING \
@@ -96,6 +104,7 @@ debug: $(TARGET)
 doc:
 	doxygen 1>/dev/null
 
+
 .PHONY: clean
 clean:
 	rm -f $(OBJS) $(TARGET) $(TARGET).exe
@@ -117,6 +126,7 @@ clean:
 
 install-bin: $(TARGET)
 	install -s -m 755 -g root -o root $(TARGET) $(PREFIX)/bin
+
 
 install-man: doc/man/t64fix.1
 	install -g root -o root -d $(MAN_PATH)
