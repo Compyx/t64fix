@@ -13,4 +13,4 @@ TODO, use the [README.md](https://github.com/Compyx/t64fix/blob/master/README.md
 
 ### Releases
 
-The latest (pre-)release is [v0.4.0-rc1](https://github.com/Compyx/t64fix/releases/tag/v0.4.0-rc1)
+The latest release is [here](https://github.com/Compyx/t64fix/releases/latest/)
