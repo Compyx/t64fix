@@ -1,3 +1,9 @@
+/** \file   base.c
+ * \brief   Memory allocation, I/O, string handling, error messages
+ *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
+ */
+
 /*
 t64fix - a small tool to correct T64 tape image files
 Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
@@ -16,11 +22,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
-/** \file   base.c
- *
- * \brief   Base functions, such as memory allocation, I/O, and error messages.
- */
 
 #include <stdlib.h>
 #include <stdio.h>

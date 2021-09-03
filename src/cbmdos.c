@@ -1,6 +1,7 @@
 /** \file   cbmdos.c
  * \brief   CBM-DOS generics
  *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
  */
 
 /*  This file is part of t64fix

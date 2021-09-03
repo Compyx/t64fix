@@ -1,3 +1,13 @@
+/** \file   t64.c
+ * \brief   T64 image handling
+ *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
+ *
+ * So far, all functions that fix stuff in the t64 files do so by writing into
+ * t64_record_t and t64_image_t instances, so the actual t64 file isn't touched
+ * until it is written to the OS, either using the original file or a copy.
+ */
+
 /*
 t64fix - a small tool to correct T64 tape image files
 Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
@@ -16,15 +26,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
-/** \file   t64.c
- * \brief   t64 image fixing
- *
- * So far, all functions that fix stuff in the t64 files do so by writing into
- * t64_record_t and t64_image_t instances, so the actual t64 file isn't touched
- * until it is written to the OS, either using the original file or a copy.
- */
-
 
 #include <stdio.h>
 #include <stdlib.h>

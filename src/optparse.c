@@ -1,3 +1,31 @@
+/** @file   optparse.c
+ * \brief   Self-contained command line parser
+ *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
+ *
+ * This command line parser is a severly simplified version of one I wrote for
+ * my assembler project.
+ *
+ * It only supports short and long options of three types:
+ *  - bool
+ *  - integer
+ *  - string
+ * The bool option will set its result to 1 when encountered, so the user is
+ * expected to set the result to 0 before calling the parser.
+ *
+ * Combining short options isn't supported (yet), neither is the
+ * `--option=VALUE` syntax (yet), all options that need an argument expect it
+ * to be in the next argv element.
+ *
+ * Exit codes of optparse_exec() are a bit funky:
+ * - On succesful completion it returns the number of command line arguments not
+ *   used by options or their arguments, this is the number of elements returned
+ *   by optparse_args(). It can be 0 if no non-option arguments were found.
+ * - OPT_EXIT_ERROR (-1) if something went wrong.
+ * - OPT_EXIT_HELP (-2) if --help was encountered.
+ * - OPT_EXIT_VERSION (-3) if --version was encountered.
+ */
+
 /*
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -13,23 +41,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
-/** @file   optparse.c
- *
- * \brief   Simplified command line parser
- *
- * This command line parser is a severly simplified version of one I wrote for
- * my assembler project. It only supports short and long options of three types:
- * bool, int, string. Combining short options isn't supported, neither is the
- * --option=VALUE syntax, all options that need an argument expect it to be in
- * the next argv element.
- *
- * Exit codes of optparse_exec() are a bit funky: on succesful completion it
- * returns the number of command line arguments not used by options or their
- * arguments. If it returns -1, something went wrong, if it returns -2, --help
- * was requested and handled, if it returns -3, --version was requested and
- * handled.
- */
 
 
 #include <stdio.h>

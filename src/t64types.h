@@ -1,3 +1,9 @@
+/** @file   t64types.h
+ * \brief   Types and defines shared by the various translation units
+ *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
+ */
+
 /*
 t64fix - a small tool to correct T64 tape image files
 Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
@@ -16,10 +22,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
-/** @file   t64types.h
- * \brief   Types and defines for t64 handling
- */
 
 #ifndef HAVE_T64TYPES_H
 #define HAVE_T64TYPES_H

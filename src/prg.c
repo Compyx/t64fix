@@ -1,3 +1,14 @@
+/** \file   prg.c
+ * \brief   Extracting PRG files
+ *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
+ *
+ * Functions to extract program (*.prg) files from t64 images.
+ *
+ * 'Frozen' files ("frz") are skipped: these are snapshots of the C64S emulator
+ * and nobody in their right mind would use that emulator today.
+ */
+
 /*
 t64fix - a small tool to correct T64 tape image files
 Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
@@ -16,15 +27,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
-/** @file   prg.c
- * \brief   Extracting PRG files
- *
- * Functions to extract program (*.prg) files from t64 images.
- *
- * 'Frozen' files ("frz") are skipped: these are snapshots of the C64S emulator
- * and nobody in their right mind would use that emulator today.
- */
 
 #include <stdio.h>
 #include <stdlib.h>

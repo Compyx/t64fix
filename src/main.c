@@ -1,3 +1,11 @@
+/** \file   main.c
+ * \brief   Program driver
+ *
+ * Executes commands given via the command line.
+ *
+ * Use `t64fix --help` for builtin help.
+ */
+
 /*
 t64fix - a small tool to correct T64 tape image files
 Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
@@ -16,11 +24,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
-/** \file   main.c
- * \brief   t64fix driver
- */
-
 
 #include <stdio.h>
 #include <stdlib.h>

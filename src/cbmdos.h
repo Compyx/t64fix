@@ -1,6 +1,7 @@
 /** \file   cbmdos.h
  * \brief   CBM-DOS generics - header
  *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
  */
 
 /*

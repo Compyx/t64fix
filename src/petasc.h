@@ -1,6 +1,5 @@
 /** \file   petasc.h
  * \brief   PETSCII to ASCII conversion and vice versa - header
- *
  */
 
 /*  This file is part of t64fix

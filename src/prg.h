@@ -1,6 +1,12 @@
+/** \file   prg.h
+ * \brief   Extracting PRG files - header
+ *
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
+ */
+
 /*
 t64fix - a small tool to correct T64 tape image files
-Copyright (C) 2016-2020  Bas Wassink <b.wassink@ziggo.nl>
+Copyright (C) 2016-2021  Bas Wassink <b.wassink@ziggo.nl>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,9 +23,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/** \file   prg.h
- * \brief   Extracting PRG files
- */
+
 
 #ifndef HAVE_PRG_H
 #define HAVE_PRG_H
