@@ -8,7 +8,7 @@ LD=$(CC)
 # Program (Msys2 automagically adds .exe)
 TARGET=t64fix
 # Version (used for `t64fix --help` and `make dist`)
-VERSION=0.4.0-rc1
+VERSION=0.4.0
 
 # Installation prefix for `make install`
 PREFIX ?= /usr/local
