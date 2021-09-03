@@ -268,9 +268,9 @@ long fread_alloc(uint8_t **dest, const char *path)
 
 /** \brief  Wrapper around fwrite(3)
  *
- * \param   path    filename/path
- * \param   data    data to write to \a path
- * \param   size    number of bytes of \a data to write
+ * \param[in]   path    filename/path
+ * \param[in]   data    data to write to \a path
+ * \param[in]   size    number of bytes of \a data to write
  *
  * \return  bool
  */
@@ -293,10 +293,10 @@ bool fwrite_wrapper(const char *path, const uint8_t *data, size_t size)
 
 /** \brief  Write a prg file to the OS
  *
- * \param   path    path of file
- * \param   data    program file data, excluding start address
- * \param   size    size of program file data, excluding start address
- * \param   start   start address to use for program file
+ * \param[in]   path    path of file
+ * \param[in]   data    program file data, excluding start address
+ * \param[in]   size    size of program file data, excluding start address
+ * \param[in]   start   start address to use for program file
  *
  * \return  bool
  */
