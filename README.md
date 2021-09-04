@@ -1,4 +1,6 @@
-# t64fix v0.4.0
+# t64fix v0.4.x
+
+Bugfix branch of version 0.4
 
 ## New in version 0.4.0
 
