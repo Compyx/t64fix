@@ -38,11 +38,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /** \brief Error codes
  */
 typedef enum t64_error_code_t {
-    T64_ERR_NONE,           /**< no error */
-    T64_ERR_OOM,            /**< out-of-memory error */
-    T64_ERR_IO,             /**< I/O error, inspect `errno` for details */
-    T64_ERR_T64_INVALID,    /**< not a T64 image */
-    T64_ERR_INDEX           /**< invalid index */
+    T64_ERR_NONE,               /**< no error */
+    T64_ERR_OOM,                /**< out-of-memory error */
+    T64_ERR_IO,                 /**< I/O error, inspect `errno` for details */
+    T64_ERR_T64_INVALID,        /**< not a T64 image */
+    T64_ERR_INDEX,              /**< invalid index */
+    T64_ERR_D64_TRACK_RANGE,    /**< d64 track number out of range */
+    T64_ERR_D64_SECTOR_RANGE,   /**< d64 sector number out of range */
+    T64_ERR_D64_INVALID_FILENAME,   /**< d64 invalid filename */
+    T64_ERR_D64_RLE             /**< d64 RLE error */
 } T64ErrorCode;
 
 
@@ -79,6 +83,7 @@ void            set_uint16(uint8_t *p, uint16_t v);
 uint32_t        get_uint32(const uint8_t *p);
 void            set_uint32(uint8_t *p, uint32_t v);
 unsigned int    num_blocks(unsigned int n);
+int             popcount_byte(uint8_t b);
 
 long            fread_alloc(uint8_t **dest, const char *path);
 
@@ -89,11 +94,15 @@ bool            fwrite_prg(const char *path, const uint8_t *data,
 const char *    t64_strerror(int code);
 
 
-void *          base_malloc(size_t n);
-void *          base_realloc(void *p, size_t n);
-void            base_free(void *p);
+void *          base_malloc(size_t size);
+void *          base_calloc(size_t nmemb, size_t size);
+void *          base_realloc(void *ptr, size_t size);
+void            base_free(void *ptr);
 
+char *          base_strdup(const char *s);
 const char *    base_basename(const char *path, const char **ext);
+
+void            base_hexdump(const uint8_t *src, size_t len, size_t voffset);
 
 #endif
 

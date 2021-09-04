@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdint.h>
 #include <inttypes.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -65,7 +66,11 @@ static const char *t64_err_msgs[] = {
     "out of memory error",
     "I/O error",
     "not a T64 image",
-    "index error"
+    "index error",
+    "track number out of range",
+    "sector number out of range",
+    "invalid filename",
+    "RLE error"
 };
 
 
@@ -334,51 +339,70 @@ fwrite_prg_exit:
  * Memory allocation functions, akin to xmalloc()
  */
 
-/** \brief  Allocate \a n bytes on the heap
+/** \brief  Allocate \a size bytes on the heap
  *
- * \param[in]   n   number of bytes to allocate
+ * \param[in]   size    number of bytes to allocate
  *
  * \return  pointer to allocated memory
  *
  * \note    calls abort() on error to allow use of a debugger.
  */
-void *base_malloc(size_t n)
+void *base_malloc(size_t size)
 {
-    void *p = malloc(n);
-    if (p == NULL) {
-        base_err_alloc(n);
+    void *ptr = malloc(size);
+    if (ptr == NULL) {
+        base_err_alloc(size);
     }
-    return p;
+    return ptr;
 }
 
 
-/** \brief  Free memory at \a p
+/** \brief  Allocate \a nmemb elements of \a size bytes and initialize to 0
+ *
+ * \param[in]   nmemb   number of elements to allocate
+ * \param[in]   size    size of elements
+ *
+ * \return  pointer to allocated memory
+ *
+ * \note    calls abort() on error to allow use of a debugger.
+ */
+void *base_calloc(size_t nmemb, size_t size)
+{
+    void *ptr = calloc(nmemb, size);
+    if (ptr == NULL) {
+        base_err_alloc(nmemb * size);
+    }
+    return ptr;
+}
+
+
+/** \brief  Free memory at \a ptr
  *
  * Wrapper around free() for symmetry with base_malloc()/base_realloc().
  *
- * \param[in]   p   memory to free
+ * \param[in]   ptr memory to free
  */
-void base_free(void *p)
+void base_free(void *ptr)
 {
-    free(p);
+    free(ptr);
 }
 
 
 /** \brief  Reallocate memory at \a p to \a n bytes
  *
- * \param[in]   p   memory to reallocate
- * \param[in]   n   new size of \a p
+ * \param[in]   ptr     memory to reallocate
+ * \param[in]   size    new size of \a ptr
  *
  * \return  pointer to reallocated memory
  *
  * \note    calls abort() on error to allow use of a debugger.
  */
-void *base_realloc(void *p, size_t n)
+void *base_realloc(void *ptr, size_t size)
 {
-    void *tmp = realloc(p, n);
+    void *tmp = realloc(ptr, size);
 
     if (tmp == NULL) {
-        base_err_alloc(n);
+        base_err_alloc(size);
     }
     return tmp;
 }
@@ -455,3 +479,99 @@ const char *base_basename(const char *path, const char **ext)
 
     return p;
 }
+
+
+/** \brief  Create heap-allocated copy of string \a s
+ *
+ * \param[in]   s   string
+ *
+ * \return  copy of \a s
+ *
+ * \note    If \a is `NULL`, an empty string will be returned, which needs to
+ *          be freed after use
+ */
+char *base_strdup(const char *s)
+{
+    char *t;
+
+    if (s == NULL || *s == '\0') {
+        t = base_calloc(1, 1);
+        *t = '\0';
+    } else {
+        size_t len = strlen(s);
+
+        t = base_malloc(len + 1);
+        memcpy(t, s, len + 1);
+    }
+    return t;
+}
+
+
+/** \brief  Create a hexdump of \a len bytes of \a src on stdout
+ *
+ * \param[in]   src     data to display
+ * \param[in]   len     number of bytes to display
+ * \param[in]   voffset virtual offset (displayed as the 'address')
+ */
+void base_hexdump(const uint8_t *src, size_t len, size_t voffset)
+{
+    uint8_t display[16];
+    size_t i = 0;
+
+    if (src == NULL || len == 0) {
+        fprintf(stderr, "%s:%s:%d: error: no input\n",
+                __FILE__, __func__, __LINE__);
+        return;
+    }
+
+    while (i < len) {
+        size_t x;
+        size_t t;
+        size_t c;
+
+        printf("%05lx  ", (unsigned long)voffset);
+        fflush(stdout);
+        for (x = 0; x < 16 && i + x < len; x++) {
+            display[x] = src[i + x];
+            printf("%02x ", src[i + x]);
+        }
+        c = x;
+        t = x;
+        while (t++ < 16) {
+            printf("   ");
+        }
+        for (t = 0; t < c; t++) {
+            putchar(isprint(display[t]) ? display[t] : '.');
+        }
+
+
+        if (i + x >= len) {
+            putchar('\n');
+            return;
+        }
+        putchar('\n');
+        i += 16;
+        voffset += 16;
+    }
+}
+
+
+/** \brief  Count number of set bits in byte \a b
+ *
+ * Count bits the Brian Kernighan way.
+ *
+ * \param[in]   b   byte to process
+ *
+ * \return  number of set bits in \a b
+ */
+int popcount_byte(uint8_t b)
+{
+    int c = 0;
+
+    while (b) {
+        b &= (uint8_t)(b - 1U);
+        c++;
+    }
+    return c;
+}
+

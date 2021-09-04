@@ -34,7 +34,7 @@ CFLAGS=-W -Wall -Wextra -pedantic -std=c99 -Wshadow -Wpointer-arith \
 
 
 # Object files
-OBJS = main.o base.o cbmdos.o optparse.o petasc.o prg.o t64.o
+OBJS = main.o base.o cbmdos.o d64.o optparse.o petasc.o prg.o t64.o
 
 
 # Files for `make dist`
@@ -50,6 +50,8 @@ DIST_FILES = \
 	src/base.h \
 	src/cbmdos.c \
 	src/cbmdos.h \
+	src/d64.c \
+	src/d64.h \
 	src/main.c \
 	src/optparse.c \
 	src/optparse.h \
@@ -89,6 +91,7 @@ all: $(TARGET)
 # dependencies of objects
 base.o:
 cbmdos.o:
+d64.o: base.o
 main.o: base.o optparse.o prg.o t64.o t64types.h
 optparse.o:
 petasc.o:
