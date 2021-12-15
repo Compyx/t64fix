@@ -301,10 +301,23 @@ static int handle_option(const option_decl_t *option, const char *arg)
  */
 static int print_option(const option_decl_t *option)
 {
-    return printf("  -%c, --%-20s%s\n",
-                  option->name_short,
-                  option->name_long,
-                  option->desc);
+    int result;
+
+    if (option->name_short != 0 && option->name_long != NULL) {
+        result = printf("  -%c, --%-20s%s\n",
+                        option->name_short,
+                        option->name_long,
+                        option->desc);
+    } else if (option->name_short == 0) {
+        result = printf("  --%-24s%s\n",
+                        option->name_long,
+                        option->desc);
+    } else {
+        result = printf("  -%-25c%s\n",
+                        option->name_short,
+                        option->desc);
+    }
+    return result;
 }
 
 /** \brief  Display usage message and options list
@@ -322,7 +335,7 @@ void optparse_help(void)
     printf("Options:\n");
     printf("  --help                    display help\n");
     printf("  --version                 display version information\n");
-    for (opt = options; opt->name_short != 0 && opt->name_long != NULL; opt++) {
+    for (opt = options; opt->name_short != 0 || opt->name_long != NULL; opt++) {
         print_option(opt);
     }
 }
