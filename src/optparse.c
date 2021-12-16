@@ -124,6 +124,8 @@ static void opt_err_alloc(size_t n)
  * Allocate \a n bytes of memory on the heap, call abort() on failure.
  *
  * \param[in]   n   number of bytes to allocate
+ *
+ * \return  pointer to allocated memory
  */
 static void *opt_malloc(size_t n)
 {
@@ -142,6 +144,9 @@ static void *opt_malloc(size_t n)
  *
  * \param[in]   p   block of memory to resize
  * \param[in]   n   new size
+ *
+ *
+ * \return  pointer to reallocated memory, can differ from \a p
  */
 static void *opt_realloc(void *p, size_t n)
 {
@@ -354,8 +359,6 @@ static void optparse_version(void)
  * \param[in]   option_list list of options available
  * \param[in]   name        program name for use in messages
  * \param[in]   version     program version for use in messages
- *
- * \return  bool
  */
 void optparse_init(const option_decl_t *option_list,
                    const char *name,
