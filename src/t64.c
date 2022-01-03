@@ -98,6 +98,7 @@ static int t64_check_magic(const t64_image_t *image)
             return (int)i;
         }
     }
+    t64_errno = T64_ERR_T64_INVALID;
     return -1;
 }
 
