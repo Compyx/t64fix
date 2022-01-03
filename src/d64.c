@@ -1,9 +1,11 @@
 /** \file   d64.c
  * \brief   D64 handling
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
  */
 
 /*
- * This file is part of zipcode-conv
+ *  This file is part of t64fix
+ *  Copyright (C) 2016-2021  Bas Wassink
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +30,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "base.h"
 #include "cbmdos.h"
@@ -122,7 +125,7 @@ long d64_track_offset(int track)
  *
  * \param[in]   track   track number
  *
- * \return  maximum sector number (indexed by 0) for \a track or -1 on error
+ * \return  maximum sector number for \a track or -1 on error
  * \throw   T64_ERR_D64_TRACK_RANGE
  *
  * \note    Assumes a 40-track image, so getting a proper error for 35-track
@@ -140,7 +143,7 @@ int d64_track_max_sector(int track)
     while (zone < (int)(sizeof speedzones / sizeof speedzones[0])) {
         if (track <= speedzones[zone].track_max) {
             /* found zone */
-            return speedzones[zone].sectors;
+            return speedzones[zone].sectors - 1;
         }
         zone++;
     }
@@ -861,4 +864,222 @@ void d64_dir_dump(d64_dir_t *dir)
                 dirent->filetype & CBMDOS_LOCKED_MASK ? '<' : ' ');
     }
     printf("%d blocks free.\n", d64_blocks_free(dir->d64));
+}
+
+
+
+/** \brief  Get pointer to BAM entry for \a track in \a d64
+ *
+ * \param[in]   d64     D64 handle
+ * \param[in]   track   track number
+ *
+ * \return  pointer into \a d64's image data
+ *
+ * \note    Only works for 35 track images, for now.
+ */
+static uint8_t *d64_bament_ptr(d64_t *d64, int track)
+{
+    assert(d64 != NULL);
+    assert(d64_track_is_valid(d64, track));
+
+    /* BAM entry for track conveniently starts at $04 in the BAM */
+    return d64->data + D64_BAM_OFFSET + (track * D64_BAMENT_SIZE);
+}
+
+
+static int d64_bament_popcount(d64_t *d64, int track)
+{
+    uint8_t bament[D64_BAMENT_SIZE];
+    int count;
+    int sec_count;
+
+    d64_bament_read(d64, bament, track);
+    sec_count = d64_track_max_sector(track) + 1;
+
+    count = popcount_byte(bament[D64_BAMENT_BITMAP + 0]);
+    count += popcount_byte(bament[D64_BAMENT_BITMAP + 1]);
+    count += popcount_byte((uint8_t)(bament[D64_BAMENT_BITMAP + 2]
+                                     & ((1 << (sec_count & 0x07)) -1)));
+
+    return count;
+}
+
+
+/** \brief  Mark a block (\a track,\a sector) used/unused
+ *
+ * Clear bit in BAM entry bitmap for (\a track, \a sector) and update the
+ * `blocks free count` byte in the BAM entry.
+ *
+ * \param[in]   d64     D64 handle
+ * \param[in]   track   track number
+ * \param[in]   sector  sector number
+ * \param[in]   used    block is used
+ */
+static void d64_bam_mark_block(d64_t *d64, int track, int sector, bool used)
+{
+    uint8_t *bament;
+    uint8_t *bitmap;
+
+    assert(d64 != NULL);
+    assert(d64_block_is_valid(d64, track, sector));
+
+    bament = d64_bament_ptr(d64, track);
+    bitmap = bament + 1 + (sector >> 3);
+
+    /* set sector-used bit in bitmap */
+    if (used) {
+        /* clear bit: marking the sector used */
+        *bitmap &= (uint8_t)~(1U << (sector & 0x07));
+    } else {
+        /* set bit: marking the sector free */
+        *bitmap |= (uint8_t)(1U << (sector & 0x07));
+    }
+
+    /* update blocks free count byte from bitmap */
+    bament[D64_BAMENT_COUNT] = (uint8_t)d64_bament_popcount(d64, track);
+}
+
+
+
+
+
+
+/** \brief  Initialize the BAM of \a d64
+ *
+ * Set all data in \a d64's BAM to that of a formatted disk.
+ *
+ * The disk name and ID are initialized to empty strings, use separate functions
+ * to set the disk name and ID.
+ *
+ * \param[in]   d64     D64 handle
+ */
+void d64_bam_init(d64_t *d64)
+{
+    uint8_t *bam = d64->data + D64_BAM_OFFSET;
+
+    /* zero out the entire BAM first */
+    memset(bam, 0, D64_BLOCK_SIZE_RAW);
+
+    /* $00-$01: first directory block */
+    bam[D64_BAM_DIR_TRACK] = D64_DIR_TRACK;
+    bam[D64_BAM_DIR_SECTOR] = D64_DIR_SECTOR;
+
+    /* $02: DOS version */
+    bam[D64_BAM_DOS_VERSION] = 0x41;    /* 'A' */
+
+    /* $03: unused ($00) */
+
+    /* $04-$8f: BAM entries for track 1-35: $00 */
+    for (int track = D64_TRACK_MIN; track <= D64_TRACK_MAX; track++) {
+        uint8_t *bament = d64_bament_ptr(d64, track);
+        int sec_count = d64_track_max_sector(track) + 1;
+
+        /* blocks free count */
+        bament[0] = (uint8_t)sec_count;
+        /* block free bitmap */
+        if (track == D64_DIR_TRACK) {
+            bament[1] = 0xfc;   /* 0 (BAM) & 1 (DIR) used, 2-7 free */
+        } else {
+            bament[1] = 0xff;   /* 0-7 free */
+        }
+        bament[2] = 0xff;   /* 8-15 */
+        bament[3] = (uint8_t)((1 << (sec_count - 16)) - 1);
+    }
+
+    /* $90-$9f: disk name
+     * $a0-$a1: $a0
+     * $a2-$a3: disk id
+     * $a4    : $a0
+     * $a5-$a6: DOS type
+     * $a7-$aa: $a0
+     */
+    memset(bam + D64_BAM_DISKNAME, 0xa0, 0x1b);
+    bam[D64_BAM_DOS_TYPE + 0] = 0x32;   /* '2' */
+    bam[D64_BAM_DOS_TYPE + 1] = 0x41;   /* 'A' */
+}
+
+
+/** \brief  Initialize \a d64 to an empty image
+ *
+ * \param[in]   d64     D64 handle
+ */
+void d64_new(d64_t *d64)
+{
+    d64_init(d64);
+    d64->size = D64_SIZE_CBMDOS;
+    d64->data = base_calloc(d64->size, 1UL);
+    d64_bam_init(d64);
+}
+
+
+/** \brief  Set disk name using ASCII encoding
+ *
+ * \param[in]   d64     D64 handle
+ * \param[in]   name    nul-terminated ASCII string
+ */
+void d64_set_diskname_asc(d64_t *d64, const char *name)
+{
+    uint8_t *diskname = d64->data + D64_BAM_OFFSET + D64_BAM_DISKNAME;
+    int i = 0;
+
+    memset(diskname, 0xa0, D64_DISKNAME_MAXLEN);
+    while (*name != '\0' && i < D64_DISKNAME_MAXLEN) {
+        diskname[i] = asc_to_pet((uint8_t)name[i]);
+    }
+}
+
+
+/** \brief  Set disk ID using ASCII encoding
+ *
+ * \param[in]   d64     D64 handle
+ * \param[in]   id      nul-terminated ASCII string
+ */
+void d64_set_diskid_asc(d64_t *d64, const char *id)
+{
+    uint8_t *diskid = d64->data + D64_BAM_OFFSET + D64_BAM_DISKID;
+    int i = 0;
+
+    diskid[0] = 0xa0;
+    diskid[1] = 0xa0;
+    while (*id != '\0' && i < D64_DISKID_MAXLEN) {
+        diskid[i] = asc_to_pet((uint8_t)id[i]);
+        i++;
+    }
+}
+
+
+/** \brief  Set disk name using PETSCII encoding
+ *
+ * \param[in]   d64     D64 handle
+ * \param[in]   name    nul-terminated PETSCII string
+ */
+void d64_set_diskname_pet(d64_t *d64, const uint8_t *name)
+{
+    uint8_t *diskname = d64->data + D64_BAM_OFFSET + D64_BAM_DISKNAME;
+    int i = 0;
+
+    memset(diskname, 0xa0, D64_DISKNAME_MAXLEN);
+    while (*name != '\0' && i < D64_DISKNAME_MAXLEN) {
+        diskname[i] = name[i];
+        i++;
+    }
+}
+
+
+/** \brief  Set disk ID using PETSCII encoding
+ *
+ * \param[in]   d64     D64 handle
+ * \param[in]   id      nul-terminated PETSCII string
+ */
+void d64_set_diskid_pet(d64_t *d64, const uint8_t *id)
+{
+    uint8_t *diskid = d64->data + D64_BAM_OFFSET + D64_BAM_DISKID;
+    int i = 0;
+
+    diskid[0] = 0xa0;
+    diskid[1] = 0xa0;
+    while (*id != '\0' && i < D64_DISKID_MAXLEN) {
+        diskid[i] = id[i];
+        i++;
+    }
 }

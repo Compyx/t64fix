@@ -1,9 +1,11 @@
 /** \file   d64.h
  * \brief   D64 handling - header
+ * \author  Bas Wassink <b.wassink@ziggo.nl>
  */
 
 /*
- * This file is part of zipcode-conv
+ *  This file is part of t64fix
+ *  Copyright (C) 2016-2021  Bas Wassink
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -174,9 +176,6 @@
 #define D64_DIR_SECTOR   1
 
 
-
-
-
 /** \brief  D64 types
  *
  */
@@ -202,9 +201,9 @@ typedef struct d64_speedzone_s {
  *
  */
 typedef struct d64_s {
-    char *          path;   /**< path to image file */
-    uint8_t *       data;   /**< binary data */
-    size_t          size;   /**< size of data */
+    char *      path;   /**< path to image file */
+    uint8_t *   data;   /**< binary data */
+    size_t      size;   /**< size of data */
     d64_type_t  type;   /**< DOS type */
 } d64_t;
 
@@ -212,7 +211,7 @@ typedef struct d64_s {
 /** \brief  D64 dirent
  */
 typedef struct d64_dirent_s {
-    d64_t * d64;    /**< D64 reference */
+    d64_t * d64;            /**< D64 reference */
     uint8_t     name[CBMDOS_FILENAME_MAX];  /**< PETSCII filename */
     uint8_t     geos[D64_DIRENT_GEOS_SIZE]; /**< GEOS data */
     uint16_t    blocks;     /**< size of the file in blocks */
@@ -249,17 +248,42 @@ typedef struct d64_dirent_iter_s {
  */
 #define D64_DISKID_MAXLEN      5
 
-/** \brief  Offset in BAM of the disk name
- */
-#define D64_BAM_DISKNAME    0x90
+/** \brief  Track number of first directory block */
+#define D64_BAM_DIR_TRACK   0x00
 
-/** \brief  Offset in BAM of the disk ID
- */
-#define D64_BAM_DISKID      0xa5
+/** \brief  Sector number of first directory block */
+#define D64_BAM_DIR_SECTOR  0x01
+
+/** \brief  DOS version */
+#define D64_BAM_DOS_VERSION 0x02
+
+/* $03 is unused, but normally set to $a0, can be used for dirart */
 
 /** \brief  Offset in BAM of the BAM entries for tracks 1-35
  */
 #define D64_BAM_TRACKS      0x04
+
+/** \brief  Offset in BAM of the disk name
+ */
+#define D64_BAM_DISKNAME    0x90
+
+/* $a0 and $a1 are filled with $a0 */
+
+/** \brief  Offset in BAM of the disk ID */
+#define D64_BAM_DISKID      0xa2
+
+/* $a4 is unused, usually $a0 */
+
+/** \brief  Offset in BAM of the DOS type
+ *
+ * The DOS type is two bytes and "2A" for standard CBM DOS
+ */
+#define D64_BAM_DOS_TYPE    0xa5
+
+/* $a7-$aa is filled with $a0 */
+
+/* $ab-$ff is $00 with normal 35 track images */
+
 
 /** \brief  Size of a BAM entry for a track
  */
@@ -274,6 +298,7 @@ typedef struct d64_dirent_iter_s {
 #define D64_BAMENT_BITMAP   0x01
 
 
+
 /** \brief  Maximum number of directory entries for a 1541
  *
  * This is hardcoded in the ROM
@@ -284,11 +309,11 @@ typedef struct d64_dirent_iter_s {
 /** \brief  D64 directory object
  */
 typedef struct d64_dir_s {
-    d64_t *d64;    /**< D64 reference */
+    d64_t *d64;                             /**< D64 reference */
     uint8_t diskname[D64_DISKNAME_MAXLEN];  /**< PETSCII disk name */
-    uint8_t diskid[D64_DISKID_MAXLEN];  /**< PETSCII disk ID + DOS type */
+    uint8_t diskid[D64_DISKID_MAXLEN];      /**< PETSCII disk ID + DOS type */
     d64_dirent_t entries[D64_DIRENT_MAX];   /**< directory entries */
-    int entry_count;    /**< number of directory entries */
+    int entry_count;                        /**< number of directory entries */
 } d64_dir_t;
 
 
@@ -297,12 +322,12 @@ typedef struct d64_dir_s {
  * A block is a raw (256 bytes) sector in a D64 image
  */
 typedef struct d64_block_iter_s {
-    d64_t *d64;                         /**< D64 image */
+    d64_t * d64;                        /**< D64 image */
     uint8_t data[D64_BLOCK_SIZE_RAW];   /**< current block data */
-    size_t size;                            /**< current block data size */
-    int track;                              /**< current block track number */
-    int sector;                             /**< current block sector number */
-    bool valid;                             /**< iterator is valid */
+    size_t  size;                       /**< current block data size */
+    int     track;                      /**< current block track number */
+    int     sector;                     /**< current block sector number */
+    bool    valid;                      /**< iterator is valid */
 } d64_block_iter_t;
 
 
@@ -361,5 +386,18 @@ bool d64_block_iter_next(d64_block_iter_t *iter);
 
 long d64_file_size(d64_t *d64, int track, int sector);
 
-#endif
 
+/*
+ * Write support
+ */
+
+void d64_bam_init(d64_t *d64);
+
+void d64_new(d64_t *d64);
+
+void d64_set_diskname_asc(d64_t *d64, const char *name);
+void d64_set_diskname_pet(d64_t *d64, const uint8_t *name);
+void d64_set_diskid_asc(d64_t *d64, const char *id);
+void d64_set_diskid_pet(d64_t *d64, const uint8_t *id);
+
+#endif
